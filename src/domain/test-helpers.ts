@@ -1,5 +1,5 @@
 /** Utilidades SOLO para las pruebas: crean partidos de ejemplo rápidamente. */
-import { parseCode } from './code-parser';
+import { parseCode, type ParsedCode } from './code-parser';
 import { createMatch, DEFAULT_SETTINGS, eventFromCode } from './factories';
 import type { Match, MatchSettings, Team } from './types';
 
@@ -31,6 +31,11 @@ export function withCodes(match: Match, codes: string[]): Match {
     return eventFromCode(r.value);
   });
   return { ...match, events: [...match.events, ...events] };
+}
+
+/** Agrega eventos que no tienen código de teclado (por ejemplo, cambio de saque). */
+export function withEvents(match: Match, inputs: ParsedCode[]): Match {
+  return { ...match, events: [...match.events, ...inputs.map(eventFromCode)] };
 }
 
 /** Repite un código n veces. */

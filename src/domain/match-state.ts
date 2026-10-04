@@ -1,13 +1,18 @@
 /**
- * Calcula el estado del partido (marcador, sets, quién saca, ganador)
- * "reproduciendo" la lista de eventos desde el principio.
+ * Calcula el estado del partido (marcador, sets, quién saca, ganador,
+ * tiempos muertos, cambios y avisos) "reproduciendo" la lista de eventos
+ * desde el principio.
  *
  * Ventaja: deshacer o borrar cualquier acción es trivial, porque el marcador
- * se recalcula solo. Ver docs/adr/ADR-002-eventos.md.
+ * se recalcula solo. Ver docs/adr/ADR-002-partido-como-eventos.md.
  */
 import { isMirrorPair, pointOutcome } from './skills';
 import type { ActionEvent, Match, MatchEvent, MatchSettings, TeamSide } from './types';
 import { otherSide } from './types';
+
+/** Límites por set y por equipo según el reglamento FIVB. */
+export const TIMEOUTS_PER_SET = 2;
+export const SUBSTITUTIONS_PER_SET = 6;
 
 export interface Score {
   home: number;
@@ -17,7 +22,22 @@ export interface Score {
 export interface SetResult extends Score {
   /** Ganador del set, o null si se está jugando. */
   winner: TeamSide | null;
+  /** Tiempos muertos pedidos por cada equipo en este set. */
+  timeouts: Score;
+  /** Cambios hechos por cada equipo en este set. */
+  substitutions: Score;
 }
+
+/**
+ * Avisos de posibles errores de carga. No impiden registrar: solo avisan.
+ * Ver docs/04-reglas-de-juego.md.
+ */
+export type RallyWarning =
+  | 'serve-wrong-team' // saca el equipo que no tenía el saque
+  | 'rally-not-closed' // empieza un saque sin que el rally anterior terminara en punto
+  | 'reception-by-server' // recibe el mismo equipo que saca
+  | 'timeout-limit' // más tiempos muertos de los permitidos en el set
+  | 'substitution-limit'; // más cambios de los permitidos en el set
 
 /** Información calculada para cada evento (útil para el historial y las estadísticas). */
 export interface EventInfo {
@@ -33,6 +53,8 @@ export interface EventInfo {
   scoreAfter: Score;
   /** true si se registró con el partido ya terminado (no suma puntos). */
   afterEnd: boolean;
+  /** Posibles errores de carga detectados en este evento. */
+  warnings: RallyWarning[];
 }
 
 export interface MatchState {
@@ -59,9 +81,9 @@ export function pointsTarget(settings: MatchSettings, setIndex: number): number 
 }
 
 /**
- * Quién saca al empezar cada set. Se alterna set a set.
- * (En el set decisivo el reglamento usa un nuevo sorteo; por ahora se alterna
- * igual. Ver "Limitaciones" en docs/04-reglas-de-juego.md.)
+ * Quién saca al empezar cada set. Se alterna set a set. En el set decisivo el
+ * reglamento usa un nuevo sorteo: la interfaz pide elegirlo y lo registra con
+ * un evento 'serve' (ver ServeChangeEvent).
  */
 export function firstServerOfSet(settings: MatchSettings, setIndex: number): TeamSide {
   return setIndex % 2 === 0 ? settings.firstServe : otherSide(settings.firstServe);
@@ -70,15 +92,20 @@ export function firstServerOfSet(settings: MatchSettings, setIndex: number): Tea
 /** Calcula quién gana el punto con un evento, sin tener en cuenta espejos. */
 function rawPointTo(event: MatchEvent): TeamSide | null {
   if (event.type === 'point') return event.team;
+  if (event.type !== 'action') return null;
   const outcome = pointOutcome(event.skill, event.quality);
   if (outcome === 'self') return event.team;
   if (outcome === 'opponent') return otherSide(event.team);
   return null;
 }
 
+function newSet(): SetResult {
+  return { home: 0, away: 0, winner: null, timeouts: { home: 0, away: 0 }, substitutions: { home: 0, away: 0 } };
+}
+
 export function computeMatchState(match: Match): MatchState {
   const { settings } = match;
-  const sets: SetResult[] = [{ home: 0, away: 0, winner: null }];
+  const sets: SetResult[] = [newSet()];
   const setsWon: Score = { home: 0, away: 0 };
   const info: Record<string, EventInfo> = {};
   let serving: TeamSide = firstServerOfSet(settings, 0);
@@ -87,6 +114,8 @@ export function computeMatchState(match: Match): MatchState {
 
   // Último evento que dio un punto (para detectar espejos), con su info.
   let lastPoint: { event: ActionEvent; info: EventInfo } | null = null;
+  // true si hubo acciones desde el último punto (el rally está en juego).
+  let rallyOpen = false;
 
   for (const event of match.events) {
     const setIndex = sets.length - 1;
@@ -95,41 +124,60 @@ export function computeMatchState(match: Match): MatchState {
 
     // ¿Es el "espejo" del punto anterior? Entonces no suma otra vez.
     if (pointTo && event.type === 'action' && lastPoint && isMirrorPair(lastPoint.event, event)) {
-      info[event.id] = {
-        ...lastPoint.info,
-        pointTo: null,
-        mirrorOf: lastPoint.event.id,
-      };
+      info[event.id] = { ...lastPoint.info, pointTo: null, mirrorOf: lastPoint.event.id, warnings: [] };
       lastPoint = null;
       continue;
     }
 
+    const servingTeam = serving;
+    const base = { setIndex, mirrorOf: null, servingTeam, afterEnd: finished };
+    const score = () => ({ home: current.home, away: current.away });
+
     if (finished) {
-      info[event.id] = {
-        setIndex,
-        pointTo: null,
-        mirrorOf: null,
-        servingTeam: serving,
-        scoreAfter: { home: current.home, away: current.away },
-        afterEnd: true,
-      };
+      info[event.id] = { ...base, pointTo: null, scoreAfter: score(), warnings: [] };
       continue;
     }
 
-    const servingTeam = serving;
+    const warnings: RallyWarning[] = [];
+
+    // Eventos que no son parte del rally
+    if (event.type === 'timeout' || event.type === 'substitution') {
+      if (event.type === 'timeout') {
+        current.timeouts[event.team] += 1;
+        if (current.timeouts[event.team] > TIMEOUTS_PER_SET) warnings.push('timeout-limit');
+      } else {
+        current.substitutions[event.team] += 1;
+        if (current.substitutions[event.team] > SUBSTITUTIONS_PER_SET) warnings.push('substitution-limit');
+      }
+      info[event.id] = { ...base, pointTo: null, scoreAfter: score(), warnings };
+      continue;
+    }
+    if (event.type === 'serve') {
+      serving = event.team;
+      rallyOpen = false;
+      lastPoint = null;
+      info[event.id] = { ...base, pointTo: null, scoreAfter: score(), warnings };
+      continue;
+    }
+
+    // Avisos de lógica del rally
+    if (event.type === 'action') {
+      if (event.skill === 'S') {
+        if (event.team !== servingTeam) warnings.push('serve-wrong-team');
+        if (rallyOpen) warnings.push('rally-not-closed');
+      }
+      if (event.skill === 'R' && event.team === servingTeam) warnings.push('reception-by-server');
+    }
+
     if (pointTo) {
       current[pointTo] += 1;
       serving = pointTo; // quien gana el punto, saca
+      rallyOpen = false;
+    } else {
+      rallyOpen = true;
     }
 
-    const eventInfo: EventInfo = {
-      setIndex,
-      pointTo,
-      mirrorOf: null,
-      servingTeam,
-      scoreAfter: { home: current.home, away: current.away },
-      afterEnd: false,
-    };
+    const eventInfo: EventInfo = { ...base, pointTo, scoreAfter: score(), warnings };
     info[event.id] = eventInfo;
     lastPoint = pointTo && event.type === 'action' ? { event, info: eventInfo } : null;
 
@@ -144,7 +192,7 @@ export function computeMatchState(match: Match): MatchState {
           finished = true;
           winner = pointTo;
         } else {
-          sets.push({ home: 0, away: 0, winner: null });
+          sets.push(newSet());
           serving = firstServerOfSet(settings, sets.length - 1);
         }
       }
@@ -160,4 +208,17 @@ export function computeMatchState(match: Match): MatchState {
     winner,
     info,
   };
+}
+
+/** true si en el set actual todavía no se registró ningún evento. */
+export function isSetUntouched(match: Match, state: MatchState): boolean {
+  return !match.events.some((e) => state.info[e.id]?.setIndex === state.currentSetIndex);
+}
+
+/**
+ * true si hay que preguntar quién saca: es el set decisivo y todavía no se
+ * registró nada en él.
+ */
+export function needsTiebreakServeChoice(match: Match, state: MatchState): boolean {
+  return !state.finished && isTiebreak(match.settings, state.currentSetIndex) && isSetUntouched(match, state);
 }

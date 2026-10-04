@@ -32,6 +32,20 @@ describe('parseCode', () => {
     expect(parseCode('AP')).toEqual({ ok: true, value: { kind: 'point', team: 'away' } });
   });
 
+  it('interpreta tiempos muertos', () => {
+    expect(parseCode('T')).toEqual({ ok: true, value: { kind: 'timeout', team: 'home' } });
+    expect(parseCode('at')).toEqual({ ok: true, value: { kind: 'timeout', team: 'away' } });
+  });
+
+  it('interpreta cambios con : o con .', () => {
+    expect(parseCode('c7:12')).toEqual({
+      ok: true,
+      value: { kind: 'substitution', team: 'home', playerOut: 7, playerIn: 12 },
+    });
+    expect(parseCode('aC3.6')).toMatchObject({ ok: true, value: { team: 'away', playerOut: 3, playerIn: 6 } });
+    expect(parseCode('c7:7').ok).toBe(false);
+  });
+
   it('rechaza códigos mal formados', () => {
     expect(parseCode('').ok).toBe(false);
     expect(parseCode('A#').ok).toBe(false);
@@ -84,6 +98,12 @@ describe('parseLine', () => {
   it('si un código es inválido no devuelve ninguno', () => {
     expect(parseLine(makeMatch(), '7A# 99A#').ok).toBe(false);
   });
+
+  it('devuelve los avisos de cada código', () => {
+    // *2R+ = recepción del local, que es el que saca → aviso
+    const r = parseLine(makeMatch({ firstServe: 'home' }), '1S+ *2R+');
+    expect(r).toMatchObject({ ok: true, warnings: [[], ['reception-by-server']] });
+  });
 });
 
 describe('validateParsedCode', () => {
@@ -94,5 +114,12 @@ describe('validateParsedCode', () => {
     if (!ok.ok || !bad.ok) throw new Error('parse');
     expect(validateParsedCode(match, ok.value)).toBeNull();
     expect(validateParsedCode(match, bad.value)).toContain('99');
+  });
+
+  it('en un cambio, comprueba los dos jugadores', () => {
+    const match = makeMatch();
+    const r = parseCode('c7:99');
+    if (!r.ok) throw new Error('parse');
+    expect(validateParsedCode(match, r.value)).toContain('99');
   });
 });

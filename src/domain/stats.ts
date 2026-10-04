@@ -32,6 +32,12 @@ export interface TeamStats {
   pointsWon: number;
   /** Puntos ganados por errores del rival o asignados a mano. */
   pointsFromOpponent: number;
+  /** Rallies jugados recibiendo, y cuántos de ellos ganó el equipo (side-out). */
+  receiveRallies: number;
+  sideOuts: number;
+  /** Rallies jugados sacando, y cuántos de ellos ganó el equipo (break-point). */
+  serveRallies: number;
+  breakPoints: number;
 }
 
 /** 'all' = todo el partido; un número = solo ese set (0 = primer set). */
@@ -61,6 +67,10 @@ export function computeTeamStats(
   const totals = emptyStatLine();
   let pointsWon = 0;
   let pointsFromOpponent = 0;
+  let receiveRallies = 0;
+  let sideOuts = 0;
+  let serveRallies = 0;
+  let breakPoints = 0;
 
   for (const event of match.events) {
     const info = state.info[event.id];
@@ -70,6 +80,18 @@ export function computeTeamStats(
     if (info.pointTo === side) {
       pointsWon += 1;
       if (event.type === 'point' || event.team === otherSide(side)) pointsFromOpponent += 1;
+    }
+
+    // Cada evento que da un punto cierra un rally.
+    if (info.pointTo) {
+      const won = info.pointTo === side;
+      if (info.servingTeam === side) {
+        serveRallies += 1;
+        if (won) breakPoints += 1;
+      } else {
+        receiveRallies += 1;
+        if (won) sideOuts += 1;
+      }
     }
 
     if (event.type !== 'action' || event.team !== side) continue;
@@ -90,5 +112,14 @@ export function computeTeamStats(
     }
   }
 
-  return { players: [...byNumber.values()], totals, pointsWon, pointsFromOpponent };
+  return {
+    players: [...byNumber.values()],
+    totals,
+    pointsWon,
+    pointsFromOpponent,
+    receiveRallies,
+    sideOuts,
+    serveRallies,
+    breakPoints,
+  };
 }

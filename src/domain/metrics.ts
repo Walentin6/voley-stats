@@ -3,7 +3,7 @@
  * Todas devuelven un número entre -1 y 1, o null si no hubo acciones.
  * Fórmulas explicadas en docs/06-estadisticas.md.
  */
-import type { SkillStats } from './stats';
+import type { SkillStats, TeamStats } from './stats';
 
 function ratio(value: number, total: number): number | null {
   return total === 0 ? null : value / total;
@@ -32,6 +32,16 @@ export function attackKill(s: SkillStats): number | null {
 /** Ataque: eficacia = (puntos − errores − bloqueados) / total. */
 export function attackEfficiency(s: SkillStats): number | null {
   return ratio(s.counts['#'] - s.counts['='] - s.counts['/'], s.total);
+}
+
+/** Side-out: % de rallies ganados cuando el equipo recibe. */
+export function sideOutPct(stats: TeamStats): number | null {
+  return ratio(stats.sideOuts, stats.receiveRallies);
+}
+
+/** Break-point: % de rallies ganados cuando el equipo saca. */
+export function breakPointPct(stats: TeamStats): number | null {
+  return ratio(stats.breakPoints, stats.serveRallies);
 }
 
 /** Formatea un indicador como porcentaje entero ("45%") o "–" si no hay datos. */

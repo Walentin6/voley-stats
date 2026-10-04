@@ -86,7 +86,37 @@ export interface PointEvent {
   timestamp: string;
 }
 
-export type MatchEvent = ActionEvent | PointEvent;
+/** Tiempo muerto pedido por un equipo. */
+export interface TimeoutEvent {
+  id: string;
+  type: 'timeout';
+  team: TeamSide;
+  timestamp: string;
+}
+
+/** Cambio de jugador (sale playerOut, entra playerIn). */
+export interface SubstitutionEvent {
+  id: string;
+  type: 'substitution';
+  team: TeamSide;
+  playerOut: number;
+  playerIn: number;
+  timestamp: string;
+}
+
+/**
+ * Indica a mano quién saca a partir de ahora. Se usa para elegir el saque del
+ * set decisivo (que se sortea) o para corregir un error.
+ */
+export interface ServeChangeEvent {
+  id: string;
+  type: 'serve';
+  /** Equipo que pasa a tener el saque. */
+  team: TeamSide;
+  timestamp: string;
+}
+
+export type MatchEvent = ActionEvent | PointEvent | TimeoutEvent | SubstitutionEvent | ServeChangeEvent;
 
 export interface Match {
   id: string;

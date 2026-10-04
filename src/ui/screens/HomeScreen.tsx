@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { computeMatchState } from '../../domain/match-state';
-import { deleteMatch, listMatches, listTeams } from '../../storage/repository';
+import { parseMatchJson } from '../../storage/import';
+import { deleteMatch, getMatch, listMatches, listTeams, saveMatch } from '../../storage/repository';
 import { Page } from '../components/Page';
 import { formatDate } from '../format';
 import type { Navigate } from '../navigation';
@@ -9,10 +10,31 @@ export function HomeScreen({ navigate }: { navigate: Navigate }) {
   const [matches, setMatches] = useState(() => listMatches());
   const teamCount = listTeams().length;
 
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+
   function handleDelete(id: string, label: string) {
     if (!confirm(`¿Borrar el partido ${label}? No se puede deshacer.`)) return;
     deleteMatch(id);
     setMatches(listMatches());
+  }
+
+  async function handleImport(file: File) {
+    setImportError(null);
+    const result = parseMatchJson(await file.text());
+    if (!result.ok) {
+      setImportError(result.error);
+      return;
+    }
+    const { match } = result;
+    if (getMatch(match.id) && !confirm('Este partido ya está guardado. ¿Reemplazarlo con el del archivo?')) return;
+    try {
+      saveMatch(match);
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : String(err));
+      return;
+    }
+    navigate({ name: 'match', matchId: match.id });
   }
 
   return (
@@ -26,10 +48,28 @@ export function HomeScreen({ navigate }: { navigate: Navigate }) {
     >
       <div className="row-between">
         <h2>Partidos</h2>
-        <button className="btn primary" onClick={() => navigate({ name: 'new-match' })}>
-          + Nuevo partido
-        </button>
+        <div className="button-row">
+          <button className="btn" onClick={() => fileInput.current?.click()}>
+            Importar
+          </button>
+          <button className="btn primary" onClick={() => navigate({ name: 'new-match' })}>
+            + Nuevo partido
+          </button>
+        </div>
+        <input
+          ref={fileInput}
+          type="file"
+          accept=".json,application/json"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = ''; // permite volver a elegir el mismo archivo
+            if (file) void handleImport(file);
+          }}
+        />
       </div>
+
+      {importError && <p className="error">{importError}</p>}
 
       {teamCount < 2 && (
         <p className="notice">

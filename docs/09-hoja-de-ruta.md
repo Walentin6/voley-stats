@@ -9,14 +9,17 @@ Cada etapa produce una versión usable. El orden puede cambiar según lo que pid
 - Estadísticas básicas por jugador y set.
 - Guardado local, exportación JSON, PWA.
 
-## Etapa 2 — Pulido para uso real (v0.2)
-- [ ] Importar un partido desde JSON (restaurar respaldos).
-- [ ] Elegir quién saca en el set decisivo.
-- [ ] Advertencias de lógica del rally (saque del equipo que no saca, rally sin cerrar).
-- [ ] Atajos de teclado globales (enfocar el campo de código desde cualquier lugar).
-- [ ] Tiempos muertos y cambios de jugadores (registro simple).
-- [ ] Estadísticas de side-out y break-point.
-- [ ] Probar en un partido real y ajustar la interfaz según la experiencia.
+## ✅ Etapa 2 — Pulido para uso real (v0.2) — *terminada*
+- [x] Fundamento free ball (`F`).
+- [x] Saque y recepción sin prefijo asignados automáticamente.
+- [x] Importar un partido desde JSON (restaurar respaldos).
+- [x] Elegir quién saca en el set decisivo, y botón para corregir el saque.
+- [x] Avisos de lógica del rally (saque del equipo que no saca, rally sin cerrar...).
+- [x] Atajos de teclado (enfocar el campo de código, Ctrl+Z, Esc).
+- [x] Tiempos muertos y cambios de jugadores (registro simple).
+- [x] Estadísticas de side-out y break-point.
+- [ ] Probar en un partido real y ajustar la interfaz según la experiencia. *(pendiente del usuario)*
+- [ ] Publicar la app en internet para usarla en celular/tablet.
 
 ## Etapa 3 — Rotaciones (v0.3)
 - [ ] Formación inicial de cada set (6 jugadores + líbero).

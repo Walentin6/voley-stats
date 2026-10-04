@@ -10,6 +10,7 @@ para que, dentro de un año, se entienda *por qué* el proyecto es como es.
 | [002](ADR-002-partido-como-eventos.md) | El partido es una lista de eventos | Aceptada |
 | [003](ADR-003-almacenamiento-local.md) | Guardar en localStorage en el MVP | Aceptada |
 | [004](ADR-004-codigos-compatibles.md) | Códigos compatibles con Data Volley | Aceptada |
+| [005](ADR-005-avisos-no-bloqueantes.md) | Los avisos de carga no bloquean | Aceptada |
 
 ## Plantilla para un ADR nuevo
 

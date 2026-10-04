@@ -45,12 +45,40 @@ Puedes escribir un rally entero: `1S+ 3R- a14A/ 9B#`. Guía completa en
 [05 — Códigos de scouting](05-codigos-de-scouting.md).
 
 ### Puntos sin acción
-Usa **+ Punto (equipo)** cuando el rival comete una falta que no quieres registrar
-(rotación, red, toque doble...) o cuando te perdiste el rally.
+Usa **+ Punto** (debajo de los jugadores de cada equipo) cuando el rival comete una falta
+que no quieres registrar (rotación, red, toque doble...) o cuando te perdiste el rally.
+
+### Tiempos muertos y cambios
+Debajo de los jugadores de cada equipo:
+- **Tiempo 0/2**: registra un tiempo muerto. El contador es del set actual.
+- **Cambio 0/6**: pulsa *Cambio*, después el jugador que **sale** y después el que **entra**.
+
+Con códigos: `T` / `aT` para tiempos muertos, `c7:12` / `ac7:12` para cambios
+(sale el 7, entra el 12). Si se pasa el límite del reglamento, el botón se pone naranja
+y aparece un aviso, pero se registra igual.
+
+### Set decisivo
+Al empezar el set decisivo (5.º o 3.º), la app pregunta **quién saca** según el nuevo
+sorteo. Hasta que no lo elijas, la carga queda bloqueada.
+
+### Avisos ⚠
+Si algo parece un error de carga (saca el equipo que no tenía el saque, recibe el que
+saca, un rally que no terminó en punto...), la acción se registra igual pero aparece un
+aviso ⚠ naranja: en la vista previa mientras escribes el código y en el historial.
+Lista completa en [04 — Reglas de juego](04-reglas-de-juego.md).
 
 ### Corregir errores
-- **↶ Deshacer última**: borra la última acción.
+- **↶ Deshacer última** (o **Ctrl + Z**): borra la última acción.
 - En el **Historial**, la ✕ de cada fila borra esa acción. El marcador se recalcula solo.
+- **⇄ Cambiar saque**: si el saque quedó en el equipo equivocado, pásalo al otro.
+
+### Atajos de teclado
+| Tecla | Qué hace |
+|---|---|
+| Cualquier letra o número | Lleva el cursor al campo de códigos (no hace falta hacer clic) |
+| **Enter** | Registra lo escrito |
+| **Esc** | Borra lo escrito en el campo de códigos |
+| **Ctrl + Z** | Deshace la última acción (si el campo de códigos está vacío) |
 
 ### ¿Qué registrar como mínimo?
 Para estadísticas útiles sin agobiarse, empieza registrando **saque, recepción y
@@ -59,6 +87,9 @@ ataque** de cada rally, y los puntos de bloqueo. Defensa y armado son opcionales
 ## 4. Ver estadísticas
 
 Pestaña **Estadísticas**. Puedes ver todo el partido o un set concreto.
+
+Arriba de cada tabla están los indicadores del equipo: **puntos ganados**, **side-out**
+(% de rallies ganados recibiendo) y **break-point** (% de rallies ganados sacando).
 Significado de cada columna: [06 — Estadísticas](06-estadisticas.md).
 
 ## 5. Respaldo
@@ -67,6 +98,10 @@ Significado de cada columna: [06 — Estadísticas](06-estadisticas.md).
   la ventana, el partido sigue en la lista de inicio.
 - **Exportar** (arriba a la derecha en el partido) descarga un archivo `.json` con todo
   el partido. Hazlo al terminar cada partido.
+- **Importar** (en la pantalla de inicio) carga un archivo `.json` exportado: sirve para
+  restaurar un respaldo o pasar un partido a otro dispositivo. Si el partido ya existe,
+  pregunta antes de reemplazarlo. Si el archivo está dañado, explica qué parte falla y no
+  toca tus datos.
 - ⚠️ Los datos viven en **ese navegador de ese dispositivo**. Si borras los datos del
   navegador o usas modo incógnito, se pierden. Exporta siempre.
 

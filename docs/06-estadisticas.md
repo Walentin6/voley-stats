@@ -39,6 +39,24 @@ Cuando no hay acciones de un fundamento, el porcentaje se muestra como `–`.
 
 > Puntos ganados = Por acciones propias + Por errores del rival / manuales.
 
+## Side-out y break-point
+
+Son los dos indicadores más usados para saber **dónde** gana o pierde puntos un equipo.
+Cada rally lo juega un equipo **sacando** y el otro **recibiendo**:
+
+| Indicador | Fórmula | Qué mide |
+|---|---|---|
+| **Side-out** | rallies ganados recibiendo / rallies jugados recibiendo | Capacidad de recuperar el saque |
+| **Break-point** | rallies ganados sacando / rallies jugados sacando | Capacidad de sumar puntos seguidos |
+
+Como referencia, en vóley de alto nivel el side-out suele estar entre 60% y 70% y el
+break-point entre 30% y 40%.
+
+Detalles:
+- Un rally termina con cada evento que da un punto (acción o punto manual). Los espejos
+  no cuentan como rally nuevo.
+- Quién sacaba se toma de `servingTeam`, calculado al reproducir los eventos.
+
 ## Ejemplo
 
 Un atacante con 10 ataques: 4 puntos (`#`), 1 error (`=`), 1 bloqueado (`/`), 4 seguidos.
@@ -47,8 +65,6 @@ Un atacante con 10 ataques: 4 puntos (`#`), 1 error (`=`), 1 bloqueado (`/`), 4 
 
 ## Próximas estadísticas
 
-- Side-out (% de puntos ganados en recepción) y break-point (% ganados sacando).
-  Ya se guarda quién sacaba en cada evento (`servingTeam`), así que es fácil de agregar.
 - Rendimiento por rotación (requiere seguir las rotaciones).
 - Ataque después de recepción perfecta / mala, contraataque.
 - Mapas de dirección (requiere zonas).

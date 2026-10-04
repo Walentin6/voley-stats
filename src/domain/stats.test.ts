@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { computeMatchState } from './match-state';
-import { attackEfficiency, attackKill, receptionPositive, serveEfficiency } from './metrics';
+import {
+  attackEfficiency,
+  attackKill,
+  breakPointPct,
+  receptionPositive,
+  serveEfficiency,
+  sideOutPct,
+} from './metrics';
 import { computeTeamStats } from './stats';
 import { makeMatch, times, withCodes } from './test-helpers';
 
@@ -39,6 +46,27 @@ describe('computeTeamStats', () => {
     const state = computeMatchState(m);
     expect(computeTeamStats(m, state, 'home', 0).totals.skills.A.total).toBe(25);
     expect(computeTeamStats(m, state, 'home', 1).totals.skills.A.total).toBe(2);
+  });
+});
+
+describe('side-out y break-point', () => {
+  it('separa los rallies según quién sacaba', () => {
+    // Saca el local: pierde el primer rally (side-out del visitante),
+    // saca el visitante: el local gana (side-out local), el local saca y gana (break-point local).
+    const m = withCodes(makeMatch({ firstServe: 'home' }), ['a12A#', '7A#', '1S#']);
+    const state = computeMatchState(m);
+    const home = computeTeamStats(m, state, 'home');
+    const away = computeTeamStats(m, state, 'away');
+    expect(home).toMatchObject({ serveRallies: 2, breakPoints: 1, receiveRallies: 1, sideOuts: 1 });
+    expect(away).toMatchObject({ serveRallies: 1, breakPoints: 0, receiveRallies: 2, sideOuts: 1 });
+    expect(sideOutPct(home)).toBe(1);
+    expect(breakPointPct(home)).toBe(0.5);
+  });
+
+  it('un espejo no cuenta como otro rally', () => {
+    const m = withCodes(makeMatch({ firstServe: 'home' }), ['1S#', 'a2R=']);
+    const home = computeTeamStats(m, computeMatchState(m), 'home');
+    expect(home.serveRallies).toBe(1);
   });
 });
 

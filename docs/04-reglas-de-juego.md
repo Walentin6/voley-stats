@@ -80,13 +80,42 @@ fundamento, pero el punto lo tiene solo la primera.
 - Quien gana un punto, saca el siguiente.
 - Al empezar cada set nuevo, el saque inicial se **alterna** (set 2 lo empieza el otro
   equipo, set 3 el primero, etc.).
+- **Set decisivo**: como el reglamento indica un nuevo sorteo, al empezar ese set la app
+  **pregunta quién saca** y no deja cargar nada hasta elegirlo. La elección se guarda como
+  un evento de cambio de saque (`serve`).
+- **Cambio manual de saque**: el botón *⇄ Cambiar saque* pasa el saque al otro equipo.
+  Sirve para corregir errores (por ejemplo, si se eligió mal quién sacaba primero). También
+  queda guardado como evento, así que se puede deshacer.
+
+## Tiempos muertos y cambios
+
+- Se registran por equipo y se cuentan **por set** (el contador vuelve a 0 en cada set).
+- Límites del reglamento FIVB: **2 tiempos muertos** y **6 cambios** por set y por equipo.
+- Pasar el límite **no se impide** (hay competiciones con otras reglas), pero se muestra un
+  aviso y el botón se pinta de naranja.
+- No afectan al marcador ni al saque.
+- Como todavía no se siguen las rotaciones, un cambio solo queda anotado (quién sale y quién
+  entra); no se comprueba que el que sale estuviera en cancha.
+
+## Avisos de carga
+
+La app revisa cada acción y marca con ⚠ las que probablemente sean un error. **Nunca impide
+registrar**: solo avisa, porque en un partido real hay situaciones raras y el estadístico
+manda (ver [ADR-005](adr/ADR-005-avisos-no-bloqueantes.md)).
+
+| Aviso | Cuándo aparece |
+|---|---|
+| Saca el equipo que no tenía el saque | Un `S` del equipo que no saca |
+| El rally anterior no terminó en punto | Un `S` cuando el rally anterior tuvo acciones pero ninguna terminó en punto |
+| Recibe el mismo equipo que saca | Un `R` del equipo que saca |
+| Más de 2 tiempos muertos en el set | Tercer tiempo muerto (o más) de un equipo en el set |
+| Más de 6 cambios en el set | Séptimo cambio (o más) de un equipo en el set |
+
+Los avisos aparecen en la vista previa del campo de códigos (antes de registrar) y en el
+historial (después).
 
 ## Limitaciones conocidas
 
-- **Saque del set decisivo**: el reglamento indica un nuevo sorteo; por ahora se alterna
-  como en los demás sets. (Pendiente: permitir elegirlo.)
-- **No se valida la lógica del rally**: la app no impide, por ejemplo, registrar un saque
-  del equipo que no saca. Se mostrará como advertencia en una versión futura.
 - **Rotaciones y líbero**: no se siguen todavía.
 - **Espejos al final del partido**: si el punto que cierra el partido es un ace, ya no se
   puede cargar el `R=` del rival (no hace falta: el punto ya está contado).

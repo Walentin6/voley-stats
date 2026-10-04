@@ -46,12 +46,22 @@ export function createMatch(input: NewMatchInput): Match {
 /** Convierte un código interpretado (o una selección con botones) en un evento. */
 export function eventFromCode(code: ParsedCode): MatchEvent {
   const base = { id: createId(), timestamp: nowIso(), team: code.team };
-  if (code.kind === 'point') return { ...base, type: 'point' };
-  return {
-    ...base,
-    type: 'action',
-    playerNumber: code.playerNumber,
-    skill: code.skill,
-    quality: code.quality,
-  };
+  switch (code.kind) {
+    case 'point':
+      return { ...base, type: 'point' };
+    case 'timeout':
+      return { ...base, type: 'timeout' };
+    case 'serve':
+      return { ...base, type: 'serve' };
+    case 'substitution':
+      return { ...base, type: 'substitution', playerOut: code.playerOut, playerIn: code.playerIn };
+    case 'action':
+      return {
+        ...base,
+        type: 'action',
+        playerNumber: code.playerNumber,
+        skill: code.skill,
+        quality: code.quality,
+      };
+  }
 }

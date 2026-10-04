@@ -4,7 +4,9 @@ import type { MatchState } from '../../domain/match-state';
 import {
   attackEfficiency,
   attackKill,
+  breakPointPct,
   formatPct,
+  sideOutPct,
   receptionPerfect,
   receptionPositive,
   serveEfficiency,
@@ -52,10 +54,29 @@ function TeamTable({ match, state, side, filter }: Props & { side: TeamSide; fil
   return (
     <section className="stats-team">
       <h3 className={`team-heading ${side}`}>{match[side].name}</h3>
-      <p className="small muted">
-        Puntos ganados: <strong>{stats.pointsWon}</strong> · Por acciones propias: {stats.totals.points} · Por
-        errores del rival / manuales: {stats.pointsFromOpponent}
-      </p>
+      <div className="team-summary">
+        <div className="kpi">
+          <span className="kpi-label">Puntos ganados</span>
+          <span className="kpi-value">{stats.pointsWon}</span>
+          <span className="kpi-detail">
+            {stats.totals.points} propios · {stats.pointsFromOpponent} por errores del rival
+          </span>
+        </div>
+        <div className="kpi">
+          <span className="kpi-label">Side-out</span>
+          <span className="kpi-value">{formatPct(sideOutPct(stats))}</span>
+          <span className="kpi-detail">
+            {stats.sideOuts} de {stats.receiveRallies} recibiendo
+          </span>
+        </div>
+        <div className="kpi">
+          <span className="kpi-label">Break-point</span>
+          <span className="kpi-value">{formatPct(breakPointPct(stats))}</span>
+          <span className="kpi-detail">
+            {stats.breakPoints} de {stats.serveRallies} sacando
+          </span>
+        </div>
+      </div>
       <div className="table-scroll">
         <table className="stats-table">
           <thead>
@@ -137,8 +158,9 @@ export function StatsView({ match, state }: Props) {
       <TeamTable match={match} state={state} side="home" filter={filter} />
       <TeamTable match={match} state={state} side="away" filter={filter} />
       <p className="small muted">
-        Ef% saque = (aces − errores) / total · Pos% recepción = (# + +) / total · Ef% ataque = (puntos − errores −
-        bloqueados) / total.
+        Side-out = % de rallies ganados recibiendo · Break-point = % de rallies ganados sacando · Ef% saque =
+        (aces − errores) / total · Pos% recepción = (# + +) / total · Ef% ataque = (puntos − errores − bloqueados) /
+        total.
       </p>
     </div>
   );

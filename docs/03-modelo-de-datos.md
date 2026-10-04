@@ -14,9 +14,14 @@ Match
  ├─ away: MatchTeam ──< Player
  ├─ settings: MatchSettings
  └─ events: MatchEvent[]   ← lo único que cambia durante el partido
-              ├─ ActionEvent  (acción de un jugador)
-              └─ PointEvent   (punto asignado a mano)
+              ├─ ActionEvent        (acción de un jugador)
+              ├─ PointEvent         (punto asignado a mano)
+              ├─ TimeoutEvent       (tiempo muerto)
+              ├─ SubstitutionEvent  (cambio de jugador)
+              └─ ServeChangeEvent   (indicar a mano quién saca)
 ```
+
+Todos los eventos tienen `id`, `type`, `team` y `timestamp`.
 
 ## Entidades
 
@@ -69,12 +74,28 @@ borras un jugador), los partidos ya jugados no se alteran.
 
 ### PointEvent
 Punto asignado a un equipo sin acción de jugador (error de rotación del rival, red,
-sanción, o simplemente una acción que no se registró).
+sanción, o simplemente una acción que no se registró). `type: 'point'`.
+
+### TimeoutEvent
+Tiempo muerto pedido por `team`. `type: 'timeout'`. No cambia marcador ni saque.
+
+### SubstitutionEvent
+| Campo | Ejemplo | Descripción |
+|---|---|---|
+| `type` | `'substitution'` | Tipo de evento |
+| `team` | `'home'` | Equipo que hace el cambio |
+| `playerOut` | `7` | Número del jugador que sale |
+| `playerIn` | `12` | Número del jugador que entra |
+
+### ServeChangeEvent
+`type: 'serve'`. A partir de este evento, saca `team`. Se usa para elegir el saque del
+set decisivo y para corregir errores con *⇄ Cambiar saque*.
 
 ## Lo que NO se guarda
 
-El marcador, los sets ganados, quién saca y las estadísticas **no se guardan**: se
-calculan a partir de `events` cada vez. Así nunca pueden quedar desincronizados.
+El marcador, los sets ganados, quién saca, los tiempos y cambios usados en cada set, los
+avisos de carga y las estadísticas **no se guardan**: se calculan a partir de `events`
+cada vez. Así nunca pueden quedar desincronizados.
 Ver [ADR-002](adr/ADR-002-partido-como-eventos.md).
 
 ## Almacenamiento
@@ -93,7 +114,13 @@ Tamaño aproximado: un partido de 5 sets tiene unas 600–1000 acciones ≈ 150�
 El navegador permite unos 5 MB, es decir, del orden de 20–30 partidos completos. Para
 guardar temporadas enteras habrá que pasar a IndexedDB (ver hoja de ruta).
 
-## Exportación
+## Exportación e importación
 
 El botón **Exportar** descarga el objeto `Match` tal cual, en JSON legible
 (`2026-10-03_Club_Norte_vs_Sur_Vóley.json`).
+
+El botón **Importar** ([`src/storage/import.ts`](../src/storage/import.ts)) hace el camino
+inverso. Antes de guardar, revisa campo por campo que el archivo sea un partido válido
+(equipos, jugadores, configuración y cada evento). Si algo falla, dice dónde
+("Evento 12: fundamento inválido") y no guarda nada. Los partidos exportados con la v0.1
+se pueden importar sin problemas.

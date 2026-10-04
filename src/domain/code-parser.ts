@@ -3,7 +3,9 @@
  * Gramática completa en docs/05-codigos-de-scouting.md.
  *
  *   [equipo] número fundamento calidad     →  "7A#", "a12R+", "*4S="
- *   [equipo] p                             →  "ap" (punto manual al visitante)
+ *   [equipo] p                             →  "ap"     (punto manual)
+ *   [equipo] T                             →  "aT"     (tiempo muerto)
+ *   [equipo] c sale:entra                  →  "c7:12"  (cambio)
  *
  * equipo: "*" = local, "a" = visitante. Si se omite:
  *   - saque (S)     → el equipo que tiene el saque
@@ -12,14 +14,22 @@
  * (el saque/recepción automático solo funciona si se pasa el contexto).
  */
 import { eventFromCode } from './factories';
-import { computeMatchState } from './match-state';
+import { computeMatchState, type RallyWarning } from './match-state';
 import { QUALITIES, SKILLS } from './skills';
 import type { Match, Quality, Skill, TeamSide } from './types';
 import { otherSide } from './types';
 
+/**
+ * Lo que el usuario quiere registrar, antes de convertirlo en evento.
+ * Lo producen tanto los códigos de teclado como los botones.
+ */
 export type ParsedCode =
   | { kind: 'action'; team: TeamSide; playerNumber: number; skill: Skill; quality: Quality }
-  | { kind: 'point'; team: TeamSide };
+  | { kind: 'point'; team: TeamSide }
+  | { kind: 'timeout'; team: TeamSide }
+  | { kind: 'substitution'; team: TeamSide; playerOut: number; playerIn: number }
+  /** Cambio manual de saque (solo desde botones, no tiene código). */
+  | { kind: 'serve'; team: TeamSide };
 
 export type ParseResult = { ok: true; value: ParsedCode } | { ok: false; error: string };
 
@@ -29,6 +39,7 @@ export interface ParseContext {
 }
 
 const ACTION_RE = /^(\d{1,2})([a-z])(.)$/i;
+const SUBSTITUTION_RE = /^c(\d{1,2})[:.](\d{1,2})$/i;
 
 /** Equipo por defecto cuando el código no tiene prefijo. */
 function defaultTeam(skill: Skill, context?: ParseContext): TeamSide {
@@ -50,9 +61,18 @@ export function parseCode(input: string, context?: ParseContext): ParseResult {
     explicitTeam = 'away';
     text = text.slice(1);
   }
+  const team = explicitTeam ?? 'home';
 
-  // 2) Punto manual
-  if (/^p$/i.test(text)) return { ok: true, value: { kind: 'point', team: explicitTeam ?? 'home' } };
+  // 2) Códigos sin jugador
+  if (/^p$/i.test(text)) return { ok: true, value: { kind: 'point', team } };
+  if (/^t$/i.test(text)) return { ok: true, value: { kind: 'timeout', team } };
+  const sub = SUBSTITUTION_RE.exec(text);
+  if (sub) {
+    const playerOut = Number(sub[1]);
+    const playerIn = Number(sub[2]);
+    if (playerOut === playerIn) return { ok: false, error: 'En un cambio, el que sale y el que entra deben ser distintos' };
+    return { ok: true, value: { kind: 'substitution', team, playerOut, playerIn } };
+  }
 
   // 3) Acción de jugador
   const m = ACTION_RE.exec(text);
@@ -69,21 +89,30 @@ export function parseCode(input: string, context?: ParseContext): ParseResult {
   if (!QUALITIES.includes(quality)) {
     return { ok: false, error: `Calidad "${quality}" desconocida. Usa ${QUALITIES.join(' ')}` };
   }
-  const team = explicitTeam ?? defaultTeam(skill, context);
-  return { ok: true, value: { kind: 'action', team, playerNumber, skill, quality } };
+  return {
+    ok: true,
+    value: { kind: 'action', team: explicitTeam ?? defaultTeam(skill, context), playerNumber, skill, quality },
+  };
 }
 
 /** Comprueba que el código sea válido para este partido (por ejemplo, que el jugador exista). */
 export function validateParsedCode(match: Match, code: ParsedCode): string | null {
-  if (code.kind === 'point') return null;
   const team = match[code.team];
-  if (!team.players.some((p) => p.number === code.playerNumber)) {
-    return `${team.name} no tiene un jugador con el número ${code.playerNumber}`;
-  }
+  const missing = (n: number) =>
+    team.players.some((p) => p.number === n) ? null : `${team.name} no tiene un jugador con el número ${n}`;
+  if (code.kind === 'action') return missing(code.playerNumber);
+  if (code.kind === 'substitution') return missing(code.playerOut) ?? missing(code.playerIn);
   return null;
 }
 
-export type ParseLineResult = { ok: true; codes: ParsedCode[] } | { ok: false; error: string };
+export type ParseLineResult =
+  | {
+      ok: true;
+      codes: ParsedCode[];
+      /** Avisos de carga de cada código (mismo orden que codes). */
+      warnings: RallyWarning[][];
+    }
+  | { ok: false; error: string };
 
 /**
  * Interpreta una línea con uno o varios códigos separados por espacios
@@ -94,16 +123,20 @@ export type ParseLineResult = { ok: true; codes: ParsedCode[] } | { ok: false; e
 export function parseLine(match: Match, line: string): ParseLineResult {
   const parts = line.trim().split(/\s+/).filter(Boolean);
   const codes: ParsedCode[] = [];
+  const warnings: RallyWarning[][] = [];
   let working = match;
+  let state = computeMatchState(working);
   for (const part of parts) {
-    const servingTeam = computeMatchState(working).serving;
-    const r = parseCode(part, { servingTeam });
+    const r = parseCode(part, { servingTeam: state.serving });
     if (!r.ok) return { ok: false, error: r.error };
     const problem = validateParsedCode(match, r.value);
     if (problem) return { ok: false, error: problem };
     codes.push(r.value);
     // Evento provisional, solo para simular cómo sigue el partido.
-    working = { ...working, events: [...working.events, eventFromCode(r.value)] };
+    const event = eventFromCode(r.value);
+    working = { ...working, events: [...working.events, event] };
+    state = computeMatchState(working);
+    warnings.push(state.info[event.id]?.warnings ?? []);
   }
-  return { ok: true, codes };
+  return { ok: true, codes, warnings };
 }

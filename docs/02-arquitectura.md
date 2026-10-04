@@ -41,7 +41,7 @@ El código está dividido en tres capas. Cada capa solo puede usar a las de abaj
 |---|---|
 | `types.ts` | Tipos centrales: `Team`, `Player`, `Match`, `MatchEvent`... |
 | `skills.ts` | Fundamentos, calidades, etiquetas, qué acciones dan punto, pares espejo |
-| `match-state.ts` | Reproduce los eventos y calcula marcador, sets, saque y ganador |
+| `match-state.ts` | Reproduce los eventos y calcula marcador, sets, saque, ganador, tiempos/cambios por set y avisos de carga |
 | `code-parser.ts` | Interpreta los códigos de teclado (`7A#`) |
 | `stats.ts` | Cuenta acciones por jugador/equipo |
 | `metrics.ts` | Porcentajes (eficacia, positividad...) |
@@ -54,6 +54,7 @@ El código está dividido en tres capas. Cada capa solo puede usar a las de abaj
 |---|---|
 | `repository.ts` | Leer/guardar/borrar equipos y partidos |
 | `export.ts` | Descargar un partido como JSON |
+| `import.ts` | Leer y validar un partido desde un JSON (+ pruebas en `import.test.ts`) |
 
 ### `src/ui/`
 | Carpeta / archivo | Responsabilidad |
