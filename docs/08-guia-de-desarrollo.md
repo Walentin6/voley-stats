@@ -84,6 +84,28 @@ git commit -m "Agrega estadística de side-out"
 ```
 Toma la foto con un mensaje que describe el cambio.
 
+```bash
+git push
+```
+Sube los commits a GitHub: <https://github.com/Walentin6/voley-stats> (repositorio privado).
+
+```bash
+git pull
+```
+Baja los cambios de GitHub (por ejemplo, si trabajaste desde otra computadora).
+
+### Versiones
+
+Cada versión publicada se marca con una etiqueta (*tag*), por ejemplo `v0.1.0`:
+
+```bash
+git tag -a v0.2.0 -m "Descripción de la versión"
+```
+
+```bash
+git push origin v0.2.0
+```
+
 ## Convenciones
 
 - Código (variables, funciones) en **inglés**; comentarios, textos de la interfaz y
