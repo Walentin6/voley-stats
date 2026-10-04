@@ -17,9 +17,11 @@ describe('computeMatchState', () => {
       'a12A/', // ataque visitante bloqueado → local
       'a3B=', // error de bloqueo visitante → local
       '2R+', // recepción buena → no termina el rally
+      '5F+', // free ball bueno → no termina el rally
+      'a6F=', // error en free ball visitante → local
     ]);
     const s = computeMatchState(m);
-    expect(s.sets[0]).toMatchObject({ home: 3, away: 1 });
+    expect(s.sets[0]).toMatchObject({ home: 4, away: 1 });
   });
 
   it('el que gana el punto pasa a sacar', () => {

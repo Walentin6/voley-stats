@@ -24,7 +24,7 @@ y dos pestañas: **Carga** y **Estadísticas**.
 
 ### Con botones (táctil)
 1. Pulsa el **jugador** (columna izquierda = local, derecha = visitante).
-2. Pulsa el **fundamento** (Saque, Recepción, Armado, Ataque, Bloqueo, Defensa).
+2. Pulsa el **fundamento** (Saque, Recepción, Armado, Ataque, Bloqueo, Defensa, Free ball).
 3. Pulsa el **resultado** (`#` `+` `!` `-` `/` `=`). Debajo de cada símbolo aparece su
    significado para ese fundamento.
 
@@ -37,7 +37,11 @@ Escribe en el campo superior y pulsa **Enter**:
 - `a12R+` → visitante, jugador 12, recepción buena
 - `ap` → punto manual para el visitante
 
-Puedes escribir un rally entero: `1S+ a3R- a14A/ 9B#`. Guía completa en
+**Saque y recepción no necesitan prefijo**: `5S+` es siempre del equipo que tiene el
+saque, y `4R-` del equipo que recibe. Mira el punto amarillo del marcador para saber
+quién saca.
+
+Puedes escribir un rally entero: `1S+ 3R- a14A/ 9B#`. Guía completa en
 [05 — Códigos de scouting](05-codigos-de-scouting.md).
 
 ### Puntos sin acción

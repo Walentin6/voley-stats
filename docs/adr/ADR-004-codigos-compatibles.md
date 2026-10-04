@@ -10,7 +10,7 @@ rápidos. Para un producto general también queremos atraer a usuarios sin exper
 ## Decisión
 1. Ofrecer **dos formas de carga** que generan el mismo evento: botones táctiles y códigos.
 2. Usar las **mismas letras y símbolos** que Data Volley para equipo (`*`/`a`),
-   fundamentos (`S R E A B D`) y calidades (`# + ! - / =`).
+   fundamentos (`S R E A B D F`) y calidades (`# + ! - / =`).
 3. Empezar por la parte esencial del código (`[equipo]número fundamento calidad`) y
    agregar las demás partes (tipo de golpe, zonas, combinaciones) como **opcionales al
    final**, para que los códigos simples sigan siendo válidos.

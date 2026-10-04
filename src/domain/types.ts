@@ -11,9 +11,10 @@ export type TeamSide = 'home' | 'away';
 
 /**
  * Fundamentos (códigos de una letra, compatibles con Data Volley):
- * S = Saque, R = Recepción, E = Armado, A = Ataque, B = Bloqueo, D = Defensa.
+ * S = Saque, R = Recepción, E = Armado, A = Ataque, B = Bloqueo, D = Defensa,
+ * F = Free ball (recepción de una pelota fácil que manda el rival).
  */
-export type Skill = 'S' | 'R' | 'E' | 'A' | 'B' | 'D';
+export type Skill = 'S' | 'R' | 'E' | 'A' | 'B' | 'D' | 'F';
 
 /**
  * Calidad de la acción, de mejor a peor:

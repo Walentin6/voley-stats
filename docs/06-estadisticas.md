@@ -27,6 +27,7 @@ Cuando no hay acciones de un fundamento, el porcentaje se muestra como `–`.
 | | **Ef%** | (`A#` − `A=` − `A/`) / Tot |
 | Bloqueo | Pts | `B#` |
 | Defensa | Tot / Err | Total de defensas / `D=` |
+| Free ball | Tot / Err | Total de free balls recibidos / `F=` |
 | Armado | Tot / Err | Total de armados / `E=` |
 
 ## Resumen del equipo

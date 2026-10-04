@@ -5,7 +5,7 @@
 import type { ActionEvent, Position, Quality, Skill } from './types';
 
 /** Orden en que se muestran los fundamentos en la interfaz. */
-export const SKILLS: readonly Skill[] = ['S', 'R', 'E', 'A', 'B', 'D'];
+export const SKILLS: readonly Skill[] = ['S', 'R', 'E', 'A', 'B', 'D', 'F'];
 
 /** Orden en que se muestran las calidades (de mejor a peor). */
 export const QUALITIES: readonly Quality[] = ['#', '+', '!', '-', '/', '='];
@@ -17,6 +17,7 @@ export const SKILL_LABELS: Record<Skill, string> = {
   A: 'Ataque',
   B: 'Bloqueo',
   D: 'Defensa',
+  F: 'Free ball',
 };
 
 /** Significado de cada calidad según el fundamento. */
@@ -27,6 +28,7 @@ export const QUALITY_LABELS: Record<Skill, Record<Quality, string>> = {
   A: { '#': 'Punto', '+': 'Bueno', '!': 'Regular', '-': 'Malo', '/': 'Bloqueado', '=': 'Error' },
   B: { '#': 'Punto', '+': 'Bueno', '!': 'Regular', '-': 'Malo', '/': 'Invasión', '=': 'Error' },
   D: { '#': 'Perfecta', '+': 'Buena', '!': 'Regular', '-': 'Mala', '/': 'Devuelve', '=': 'Error' },
+  F: { '#': 'Perfecta', '+': 'Buena', '!': 'Regular', '-': 'Mala', '/': 'Devuelve', '=': 'Error' },
 };
 
 export const POSITION_LABELS: Record<Position, string> = {

@@ -5,6 +5,12 @@ Las versiones siguen [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+### Agregado
+- Fundamento **Free ball** (`F`), como en Data Volley: botón, código (`5F+`), columnas en estadísticas y error `F=` que da punto al rival.
+
+### Cambiado
+- Los códigos de **saque** sin prefijo se asignan al equipo que tiene el saque, y los de **recepción** al que recibe (antes, todo código sin prefijo era del local). En una línea con varios códigos, cada uno usa el saque del momento.
+
 ## [0.1.0] — 2026-10-03
 
 Primera versión (MVP).

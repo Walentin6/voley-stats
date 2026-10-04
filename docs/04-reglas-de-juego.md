@@ -13,21 +13,26 @@ Implementadas en [`src/domain/skills.ts`](../src/domain/skills.ts) y
 | `A` | Ataque (*attack*) |
 | `B` | Bloqueo (*block*) |
 | `D` | Defensa (*dig*) |
+| `F` | Free ball (*freeball*) |
 
 Las letras son las mismas que usa Data Volley.
+
+**Free ball**: se registra al jugador que **recibe** una pelota fácil del rival (una
+pelota que pasa sin ataque, de antebrazos o de dedos). Se evalúa como una recepción:
+qué tan bien quedó la pelota para armar el contraataque.
 
 ## Calidades
 
 De mejor a peor. El significado exacto depende del fundamento:
 
-| Calidad | Saque | Recepción | Armado | Ataque | Bloqueo | Defensa |
-|---|---|---|---|---|---|---|
-| `#` | Ace | Perfecta | Perfecto | **Punto** | **Punto** | Perfecta |
-| `+` | Bueno | Buena | Bueno | Bueno | Bueno | Buena |
-| `!` | Regular | Regular | Regular | Regular | Regular | Regular |
-| `-` | Malo | Mala | Malo | Malo | Malo | Mala |
-| `/` | Rival devuelve | Devuelve | Muy malo | **Bloqueado** | **Invasión** | Devuelve |
-| `=` | **Error** | **Error** | **Error** | **Error** | **Error** | **Error** |
+| Calidad | Saque | Recepción | Armado | Ataque | Bloqueo | Defensa | Free ball |
+|---|---|---|---|---|---|---|---|
+| `#` | Ace | Perfecta | Perfecto | **Punto** | **Punto** | Perfecta | Perfecta |
+| `+` | Bueno | Buena | Bueno | Bueno | Bueno | Buena | Buena |
+| `!` | Regular | Regular | Regular | Regular | Regular | Regular | Regular |
+| `-` | Malo | Mala | Malo | Malo | Malo | Mala | Mala |
+| `/` | Rival devuelve | Devuelve | Muy malo | **Bloqueado** | **Invasión** | Devuelve | Devuelve |
+| `=` | **Error** | **Error** | **Error** | **Error** | **Error** | **Error** | **Error** |
 
 En **negrita**, las que terminan el rally.
 

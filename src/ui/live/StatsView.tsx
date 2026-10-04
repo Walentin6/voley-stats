@@ -18,7 +18,7 @@ interface Props {
 }
 
 function Cells({ line }: { line: StatLine }) {
-  const { S, R, A, B, D, E } = line.skills;
+  const { S, R, A, B, D, E, F } = line.skills;
   return (
     <>
       <td className="strong">{line.points}</td>
@@ -39,6 +39,8 @@ function Cells({ line }: { line: StatLine }) {
       <td className="grp">{B.counts['#']}</td>
       <td className="grp">{D.total}</td>
       <td>{D.counts['=']}</td>
+      <td className="grp">{F.total}</td>
+      <td>{F.counts['=']}</td>
       <td className="grp">{E.total}</td>
       <td>{E.counts['=']}</td>
     </>
@@ -65,6 +67,7 @@ function TeamTable({ match, state, side, filter }: Props & { side: TeamSide; fil
               <th colSpan={6} className="grp">Ataque</th>
               <th className="grp">Bloq.</th>
               <th colSpan={2} className="grp">Defensa</th>
+              <th colSpan={2} className="grp">Free ball</th>
               <th colSpan={2} className="grp">Armado</th>
             </tr>
             <tr>
@@ -83,6 +86,8 @@ function TeamTable({ match, state, side, filter }: Props & { side: TeamSide; fil
               <th>Pts%</th>
               <th>Ef%</th>
               <th className="grp">Pts</th>
+              <th className="grp">Tot</th>
+              <th>Err</th>
               <th className="grp">Tot</th>
               <th>Err</th>
               <th className="grp">Tot</th>

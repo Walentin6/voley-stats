@@ -510,6 +510,9 @@ button:focus-visible {
   grid-template-columns: repeat(6, 1fr);
   gap: 0.35rem;
 }
+.skill-bar {
+  grid-template-columns: repeat(7, 1fr);
+}
 .skill-btn,
 .quality-btn {
   font: inherit;
@@ -553,9 +556,11 @@ button:focus-visible {
   flex-wrap: wrap;
 }
 @media (max-width: 520px) {
-  .skill-bar,
   .quality-bar {
     grid-template-columns: repeat(3, 1fr);
+  }
+  .skill-bar {
+    grid-template-columns: repeat(4, 1fr);
   }
   .player-grid {
     grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));

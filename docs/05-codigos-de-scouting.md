@@ -12,14 +12,32 @@ Las pruebas están en [`code-parser.test.ts`](../src/domain/code-parser.test.ts)
 
 | Parte | Valores | Obligatorio |
 |---|---|---|
-| equipo | `*` = local · `a` = visitante | No (si se omite: **local**) |
+| equipo | `*` = local · `a` = visitante | No (ver abajo) |
 | número | 0–99 (número de camiseta) | Sí, salvo en puntos manuales |
-| fundamento | `S` `R` `E` `A` `B` `D` | Sí |
+| fundamento | `S` `R` `E` `A` `B` `D` `F` | Sí |
 | calidad | `#` `+` `!` `-` `/` `=` | Sí |
 | `p` | Punto manual para ese equipo | — |
 
 Mayúsculas y minúsculas dan igual. Se pueden escribir **varios códigos separados por
 espacios** y registrarlos juntos con Enter.
+
+## Equipo cuando no hay prefijo
+
+| Fundamento | Sin prefijo se asigna a... | Por qué |
+|---|---|---|
+| `S` saque | El equipo que **tiene el saque** | Solo puede sacar quien tiene el saque |
+| `R` recepción | El equipo que **recibe** (el otro) | Solo puede recibir el que no saca |
+| Todos los demás y `p` | El **local** | Pueden ser de cualquiera de los dos |
+
+El prefijo `*` o `a`, si se escribe, **siempre manda**.
+
+Ejemplo: saca el local y su jugador 5 falla el saque.
+1. `5S=` → punto para el visitante, que pasa a sacar.
+2. `3S+` → como ahora saca el visitante, es el **3 del visitante**. No hace falta escribir `a3S+`.
+3. `4R-` → recibe el local: es el **4 del local**.
+
+Si en una misma línea un código termina el rally, los siguientes ya usan el saque nuevo:
+en `5S= 3S+`, el `3S+` es del visitante.
 
 ## Ejemplos
 
@@ -28,11 +46,13 @@ espacios** y registrarlos juntos con Enter.
 | `7A#` | Local, jugador 7, ataque punto |
 | `*7A#` | Lo mismo (prefijo explícito) |
 | `a12R+` | Visitante, jugador 12, recepción buena |
-| `4S=` | Local, jugador 4, error de saque |
+| `4S=` | Jugador 4 del equipo que saca, error de saque |
+| `12R+` | Jugador 12 del equipo que recibe, recepción buena |
 | `a3B/` | Visitante, jugador 3, invasión en el bloqueo |
+| `5F+` | Local, jugador 5, free ball bueno |
 | `p` | Punto manual para el local |
 | `ap` | Punto manual para el visitante |
-| `1S+ a3R- a14A/ 9B#` | Un rally completo en una línea |
+| `1S+ 3R- a14A/ 9B#` | Un rally completo en una línea (saca el local) |
 
 ## Validaciones
 

@@ -3,7 +3,7 @@
  * Se pueden escribir varios códigos separados por espacios: "1S# a2R= ".
  */
 import { useState } from 'react';
-import { parseCode, validateParsedCode, type ParsedCode } from '../../domain/code-parser';
+import { parseLine, type ParsedCode } from '../../domain/code-parser';
 import type { Match } from '../../domain/types';
 import { describeCode } from '../format';
 
@@ -13,30 +13,15 @@ interface Props {
   onRecord: (code: ParsedCode) => void;
 }
 
-type Check = { ok: true; codes: ParsedCode[] } | { ok: false; error: string };
-
-function check(match: Match, text: string): Check {
-  const parts = text.trim().split(/\s+/).filter(Boolean);
-  const codes: ParsedCode[] = [];
-  for (const part of parts) {
-    const r = parseCode(part);
-    if (!r.ok) return { ok: false, error: r.error };
-    const problem = validateParsedCode(match, r.value);
-    if (problem) return { ok: false, error: problem };
-    codes.push(r.value);
-  }
-  return { ok: true, codes };
-}
-
 export function CodeInput({ match, disabled, onRecord }: Props) {
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const preview = text.trim() ? check(match, text) : null;
+  const preview = text.trim() ? parseLine(match, text) : null;
 
   function submit() {
     if (!text.trim()) return;
-    const result = check(match, text);
+    const result = parseLine(match, text);
     if (!result.ok) {
       setError(result.error);
       return;
@@ -77,7 +62,7 @@ export function CodeInput({ match, disabled, onRecord }: Props) {
             ? preview.ok
               ? preview.codes.map((c) => describeCode(match, c)).join('  |  ')
               : preview.error
-            : 'Sin prefijo o * = local, a = visitante. Fundamentos: S R E A B D. Calidades: # + ! - / =')}
+            : '* = local, a = visitante. Sin prefijo: S = quien saca, R = quien recibe, resto = local. Fundamentos: S R E A B D F. Calidades: # + ! - / =')}
       </p>
     </section>
   );
