@@ -6,6 +6,8 @@
  * (ver match-state.ts y stats.ts).
  */
 
+import type { Zone } from './zones';
+
 /** Lado del partido: equipo local o visitante. */
 export type TeamSide = 'home' | 'away';
 
@@ -71,6 +73,10 @@ export interface ActionEvent {
   playerNumber: number;
   skill: Skill;
   quality: Quality;
+  /** Zona de origen, en la cancha propia (opcional). Ver src/domain/zones.ts. */
+  startZone?: Zone;
+  /** Zona de destino, en la cancha rival con la numeración del rival (opcional). */
+  endZone?: Zone;
   /** Fecha y hora ISO en la que se registró. */
   timestamp: string;
 }

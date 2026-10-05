@@ -165,6 +165,27 @@ jugadores de la zona de atrás y nunca saca. Ver
 
 Si se registra un cambio con el líbero, se avisa y no se cuenta.
 
+## Zonas
+
+Implementadas en [`src/domain/zones.ts`](../src/domain/zones.ts). Como en Data Volley, cada
+mitad de la cancha tiene **9 zonas**, numeradas desde el punto de vista de **su propio
+equipo**, mirando a la red:
+
+```
+        RED
+   4    3    2      ← adelante (hasta la línea de 3 m)
+   7    8    9      ← medio
+   5    6    1      ← atrás
+```
+
+- Una acción puede tener **zona de origen** (en la cancha propia: desde dónde se saca o se
+  ataca) y **zona de destino** (en la cancha rival, con la numeración del rival).
+- Ejemplos: un ataque de punta cruzado profundo es **4→5**; por la línea, **4→1**. Un saque
+  desde la derecha al centro del fondo es **1→6**.
+- Las zonas son **opcionales**: se pueden cargar en todos, algunos o ningún saque o ataque.
+- Se cargan con el código (`7A#47`) o con la cancha dibujada (interruptor **Zonas**).
+- Por ahora no se usan las subzonas (A–D) de Data Volley.
+
 ## Avisos de carga
 
 La app revisa cada acción y marca con ⚠ las que probablemente sean un error. **Nunca impide

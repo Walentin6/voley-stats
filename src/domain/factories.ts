@@ -67,6 +67,9 @@ export function eventFromCode(code: ParsedCode, keep?: Pick<MatchEvent, 'id' | '
         playerNumber: code.playerNumber,
         skill: code.skill,
         quality: code.quality,
+        // Las zonas solo se guardan si se indicaron
+        ...(code.startZone ? { startZone: code.startZone } : {}),
+        ...(code.endZone ? { endZone: code.endZone } : {}),
       };
   }
 }

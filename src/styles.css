@@ -610,6 +610,155 @@ button:focus-visible {
 .lineup-slot select {
   padding: 0.35rem 0.3rem;
 }
+/* ---------- Cancha (SVG) ---------- */
+.court {
+  width: 100%;
+  max-width: 720px;
+  display: block;
+  user-select: none;
+}
+.court .zone-bg {
+  fill: var(--surface);
+  stroke: var(--border);
+  stroke-width: 0.4;
+}
+.court .court-zone.home .zone-bg {
+  fill: var(--home-soft);
+}
+.court .court-zone.away .zone-bg {
+  fill: var(--away-soft);
+}
+.court .zone-heat {
+  fill: var(--primary);
+  pointer-events: none;
+}
+.court .court-zone.clickable {
+  cursor: pointer;
+}
+.court .court-zone.clickable .zone-bg {
+  stroke: var(--primary);
+  stroke-width: 0.6;
+}
+.court .court-zone.clickable:hover .zone-bg {
+  fill: var(--surface-2);
+}
+.zone-picker .court {
+  max-width: 520px;
+}
+/* Al elegir zonas, la mitad que no se puede tocar queda atenuada */
+.zone-picker .court .court-zone:not(.clickable) {
+  opacity: 0.5;
+}
+.court .court-zone.selected .zone-bg {
+  fill: var(--primary);
+}
+.court .court-zone.selected .zone-text {
+  fill: var(--primary-text);
+}
+.court .zone-text {
+  font-size: 7px;
+  font-weight: 700;
+  fill: var(--text);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+.zone-map .court .zone-text {
+  font-size: 5px;
+}
+.court .zone-number {
+  font-size: 4px;
+  fill: var(--muted);
+  pointer-events: none;
+}
+.court .court-border {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 0.8;
+}
+.court .court-attack-line {
+  stroke: var(--muted);
+  stroke-width: 0.4;
+  stroke-dasharray: 2 1.5;
+}
+.court .court-net {
+  stroke: var(--text);
+  stroke-width: 1.6;
+}
+.court .court-label {
+  font-size: 5px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+.court .court-label.home {
+  fill: var(--home);
+}
+.court .court-label.away {
+  fill: var(--away);
+}
+.court .route {
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+.court .route.point {
+  stroke: var(--q0);
+}
+.court .route.error {
+  stroke: var(--q5);
+}
+.court .route.other {
+  stroke: var(--muted);
+}
+.court .route-arrow.point {
+  fill: var(--q0);
+}
+.court .route-arrow.error {
+  fill: var(--q5);
+}
+.court .route-arrow.other {
+  fill: var(--muted);
+}
+.zone-picker {
+  background: var(--surface);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius);
+  padding: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.zone-picker p {
+  margin: 0;
+}
+.zone-map {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+.legend-item::before {
+  content: '';
+  display: inline-block;
+  width: 1.2rem;
+  height: 0.25rem;
+  border-radius: 2px;
+  margin-right: 0.3rem;
+  vertical-align: middle;
+}
+.legend-item.point::before {
+  background: var(--q0);
+}
+.legend-item.error::before {
+  background: var(--q5);
+}
+.legend-item.other::before {
+  background: var(--muted);
+}
 .rotation-heading {
   margin: 0.75rem 0 0.4rem;
   font-size: 0.95rem;

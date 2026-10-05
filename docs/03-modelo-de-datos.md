@@ -71,6 +71,8 @@ borras un jugador), los partidos ya jugados no se alteran.
 | `playerNumber` | `7` | Número del jugador |
 | `skill` | `'A'` | Fundamento ([04](04-reglas-de-juego.md)) |
 | `quality` | `'#'` | Calidad ([04](04-reglas-de-juego.md)) |
+| `startZone` | `4` | Zona de origen 1–9, en la cancha propia (opcional) |
+| `endZone` | `7` | Zona de destino 1–9, en la cancha rival (opcional) |
 | `timestamp` | `2026-10-03T21:15:04Z` | Momento en que se registró (servirá para sincronizar video) |
 
 ### PointEvent
@@ -117,6 +119,7 @@ En el `localStorage` del navegador ([ADR-003](adr/ADR-003-almacenamiento-local.m
 |---|---|
 | `voley:v1:teams` | Lista de todos los equipos |
 | `voley:v1:match:<id>` | Un partido completo |
+| `voley:v1:prefs` | Preferencias de este dispositivo (por ejemplo, si se cargan zonas) |
 
 El `v1` es la versión del formato. Si en el futuro cambia la estructura, se usará `v2`
 y una migración que convierta los datos viejos.

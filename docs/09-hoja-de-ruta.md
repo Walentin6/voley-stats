@@ -42,11 +42,14 @@ Cada etapa produce una versión usable. El orden puede cambiar según lo que pid
 - [x] Puntos regalados por tipo de error.
 - [x] El punto de un par espejo se acredita a la acción del equipo que lo ganó.
 
-## Etapa 4 — Cancha y zonas (v0.4)
-- [ ] Marcar zona de origen y destino haciendo clic en un dibujo de la cancha.
-- [ ] Ampliar los códigos: tipo de golpe, zonas, subzonas (compatible con Data Volley).
-- [ ] Mapas de dirección de saque y ataque.
-- [ ] Distribución del armador.
+## ✅ Etapa 4 — Cancha y zonas (v0.4) — *terminada*
+- [x] Marcar zona de origen y destino tocando la cancha dibujada (interruptor "Zonas").
+- [x] Zonas en los códigos (`7A#47`, `S+16`, `7A#~7`) y en el editor de acciones.
+- [x] Mapas de dirección de saque y ataque, con filtro por jugador.
+- [x] Distribución del ataque por zona (del armador) según la fase.
+- [ ] Subzonas A–D.
+- [ ] Tipo de golpe (H, M, Q, T...) y combinaciones de ataque.
+- [ ] Recepción por zona (dónde se recibe mejor o peor).
 
 ## Etapa 5 — Almacenamiento serio (v0.5)
 - [ ] Migrar de localStorage a IndexedDB (más capacidad, temporadas completas).

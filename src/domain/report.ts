@@ -5,10 +5,11 @@
  */
 import type { MatchState } from './match-state';
 import { buildRallies, firstAttackAfterReception, isPositiveReception, receptionOf } from './rallies';
-import { QUALITIES } from './skills';
+import { pointOutcome, QUALITIES } from './skills';
 import { addToSkill, computeTeamStats, emptySkillStats, type SetFilter, type SkillStats } from './stats';
-import type { Match, Quality, TeamSide } from './types';
+import type { ActionEvent, Match, Quality, TeamSide } from './types';
 import { otherSide } from './types';
+import type { Zone } from './zones';
 
 // ---------------------------------------------------------------------------
 // Resumen por set
@@ -76,6 +77,36 @@ export interface AttackPhases {
   transition: SkillStats;
 }
 
+/**
+ * Fase de un ataque:
+ * - 'k1-positive' / 'k1-negative': después de recepción positiva / negativa
+ * - 'k1': después de recepción, pero la recepción no se cargó
+ * - 'k2': contraataque
+ */
+export type AttackPhase = 'k1-positive' | 'k1-negative' | 'k1' | 'k2';
+
+/** Todos los ataques del equipo con su fase. */
+export function classifyAttacks(
+  match: Match,
+  state: MatchState,
+  side: TeamSide,
+  setFilter: SetFilter = 'all',
+): { attack: ActionEvent; phase: AttackPhase }[] {
+  const result: { attack: ActionEvent; phase: AttackPhase }[] = [];
+  for (const rally of buildRallies(match, state)) {
+    if (setFilter !== 'all' && rally.setIndex !== setFilter) continue;
+    const k1 = rally.servingTeam !== side ? firstAttackAfterReception(rally) : null;
+    const reception = receptionOf(rally);
+    for (const a of rally.actions) {
+      if (a.team !== side || a.skill !== 'A') continue;
+      let phase: AttackPhase = 'k2';
+      if (a === k1) phase = !reception ? 'k1' : isPositiveReception(reception.quality) ? 'k1-positive' : 'k1-negative';
+      result.push({ attack: a, phase });
+    }
+  }
+  return result;
+}
+
 export function computeAttackPhases(
   match: Match,
   state: MatchState,
@@ -88,26 +119,119 @@ export function computeAttackPhases(
     afterNegativeReception: emptySkillStats(),
     transition: emptySkillStats(),
   };
-  for (const rally of buildRallies(match, state)) {
-    if (setFilter !== 'all' && rally.setIndex !== setFilter) continue;
-    const k1 = rally.servingTeam !== side ? firstAttackAfterReception(rally) : null;
-    const reception = receptionOf(rally);
-    for (const a of rally.actions) {
-      if (a.team !== side || a.skill !== 'A') continue;
-      if (a === k1) {
-        addToSkill(phases.afterReception, a.quality);
-        if (reception) {
-          const group = isPositiveReception(reception.quality)
-            ? phases.afterPositiveReception
-            : phases.afterNegativeReception;
-          addToSkill(group, a.quality);
-        }
-      } else {
-        addToSkill(phases.transition, a.quality);
-      }
+  for (const { attack, phase } of classifyAttacks(match, state, side, setFilter)) {
+    if (phase === 'k2') {
+      addToSkill(phases.transition, attack.quality);
+      continue;
     }
+    addToSkill(phases.afterReception, attack.quality);
+    if (phase === 'k1-positive') addToSkill(phases.afterPositiveReception, attack.quality);
+    if (phase === 'k1-negative') addToSkill(phases.afterNegativeReception, attack.quality);
   }
   return phases;
+}
+
+// ---------------------------------------------------------------------------
+// Distribución del ataque por zona de origen ("distribución del armador")
+// ---------------------------------------------------------------------------
+
+export interface AttackZoneRow {
+  /** Zona desde la que se atacó (null = sin zona cargada). */
+  zone: Zone | null;
+  all: SkillStats;
+  k1Positive: SkillStats;
+  k1Negative: SkillStats;
+  k2: SkillStats;
+}
+
+export function computeAttackDistribution(
+  match: Match,
+  state: MatchState,
+  side: TeamSide,
+  setFilter: SetFilter = 'all',
+): AttackZoneRow[] {
+  const rows = new Map<Zone | null, AttackZoneRow>();
+  for (const { attack, phase } of classifyAttacks(match, state, side, setFilter)) {
+    const zone = attack.startZone ?? null;
+    let row = rows.get(zone);
+    if (!row) {
+      row = { zone, all: emptySkillStats(), k1Positive: emptySkillStats(), k1Negative: emptySkillStats(), k2: emptySkillStats() };
+      rows.set(zone, row);
+    }
+    addToSkill(row.all, attack.quality);
+    if (phase === 'k1-positive') addToSkill(row.k1Positive, attack.quality);
+    if (phase === 'k1-negative') addToSkill(row.k1Negative, attack.quality);
+    if (phase === 'k2') addToSkill(row.k2, attack.quality);
+  }
+  // Orden de Data Volley: delanteros 4, 3, 2, después zagueros y medio; "sin zona" al final.
+  const order: (Zone | null)[] = [4, 3, 2, 1, 6, 5, 7, 8, 9, null];
+  return [...rows.values()].sort((a, b) => order.indexOf(a.zone) - order.indexOf(b.zone));
+}
+
+// ---------------------------------------------------------------------------
+// Mapas de dirección (saque y ataque)
+// ---------------------------------------------------------------------------
+
+export type RouteOutcome = 'point' | 'error' | 'other';
+
+export interface ZoneRoute {
+  start: Zone | null;
+  end: Zone;
+  outcome: RouteOutcome;
+  count: number;
+}
+
+export interface ZoneMap {
+  /** Recorridos agrupados (origen, destino, resultado). Solo acciones con zona de destino. */
+  routes: ZoneRoute[];
+  /** Cuántas acciones salieron de cada zona (en la cancha propia). */
+  startCounts: Partial<Record<Zone, number>>;
+  /** Cuántas acciones terminaron en cada zona (en la cancha rival). */
+  endCounts: Partial<Record<Zone, number>>;
+  /** Acciones que pasan el filtro, y cuántas tienen alguna zona cargada. */
+  total: number;
+  withZones: number;
+}
+
+export function computeZoneMap(
+  match: Match,
+  state: MatchState,
+  side: TeamSide,
+  skill: 'S' | 'A',
+  setFilter: SetFilter = 'all',
+  playerNumber: number | null = null,
+): ZoneMap {
+  const routes = new Map<string, ZoneRoute>();
+  const startCounts: Partial<Record<Zone, number>> = {};
+  const endCounts: Partial<Record<Zone, number>> = {};
+  let total = 0;
+  let withZones = 0;
+
+  for (const event of match.events) {
+    if (event.type !== 'action' || event.team !== side || event.skill !== skill) continue;
+    if (playerNumber !== null && event.playerNumber !== playerNumber) continue;
+    const info = state.info[event.id];
+    if (!info || info.afterEnd) continue;
+    if (setFilter !== 'all' && info.setIndex !== setFilter) continue;
+    total += 1;
+    const { startZone, endZone } = event;
+    if (startZone || endZone) withZones += 1;
+    if (startZone) startCounts[startZone] = (startCounts[startZone] ?? 0) + 1;
+    if (!endZone) continue;
+    endCounts[endZone] = (endCounts[endZone] ?? 0) + 1;
+
+    const outcome: RouteOutcome =
+      event.quality === '#' || info.impliedAce
+        ? 'point'
+        : pointOutcome(event.skill, event.quality) === 'opponent'
+          ? 'error'
+          : 'other';
+    const key = `${startZone ?? '-'}:${endZone}:${outcome}`;
+    const route = routes.get(key) ?? { start: startZone ?? null, end: endZone, outcome, count: 0 };
+    route.count += 1;
+    routes.set(key, route);
+  }
+  return { routes: [...routes.values()], startCounts, endCounts, total, withZones };
 }
 
 // ---------------------------------------------------------------------------

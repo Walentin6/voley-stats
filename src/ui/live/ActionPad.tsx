@@ -20,6 +20,9 @@ interface Props {
   onRecord: (code: ParsedCode) => void;
   onUndo: () => void;
   onEditLineup: (team: TeamSide) => void;
+  /** Mostrar la cancha para cargar zonas después de cada saque y ataque. */
+  zonesEnabled: boolean;
+  onToggleZones: () => void;
 }
 
 /** Orden de las posiciones en la cuadrícula: adelante P4 P3 P2, atrás P5 P6 P1. */
@@ -36,7 +39,16 @@ interface SubDraft {
   playerOut: number | null;
 }
 
-export function ActionPad({ match, state, disabled, onRecord, onUndo, onEditLineup }: Props) {
+export function ActionPad({
+  match,
+  state,
+  disabled,
+  onRecord,
+  onUndo,
+  onEditLineup,
+  zonesEnabled,
+  onToggleZones,
+}: Props) {
   const [selected, setSelected] = useState<Selection | null>(null);
   const [skill, setSkill] = useState<Skill | null>(null);
   const [sub, setSub] = useState<SubDraft | null>(null);
@@ -222,6 +234,14 @@ export function ActionPad({ match, state, disabled, onRecord, onUndo, onEditLine
       </div>
 
       <div className="pad-footer">
+        <button
+          className={`btn ${zonesEnabled ? 'active' : ''}`}
+          onClick={onToggleZones}
+          aria-pressed={zonesEnabled}
+          title="Después de cada saque y ataque, mostrar la cancha para marcar origen y destino"
+        >
+          Zonas: {zonesEnabled ? 'Sí' : 'No'}
+        </button>
         {(selected || skill || sub) && (
           <button className="btn ghost" onClick={reset}>
             Cancelar selección

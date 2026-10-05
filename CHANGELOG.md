@@ -5,6 +5,21 @@ Las versiones siguen [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [0.4.0] — 2026-10-05
+
+Cancha y zonas.
+
+### Agregado
+- **Zonas 1–9** de origen y destino para cada acción, con la numeración de Data Volley (opcionales).
+- **Zonas en los códigos**: `7A#47` (de 4 a 7), `7A#4`, `7A#~7` (solo destino), `S+16`.
+- **Cancha dibujada para marcar zonas**: con el interruptor "Zonas: Sí", después de cada saque o ataque aparece la cancha para tocar origen y destino. No bloquea la carga. La preferencia se recuerda en el dispositivo.
+- Zonas en el **editor de acciones** y en el historial (ej. "(4→7)").
+- **Distribución del ataque por zona**: desde qué zonas ataca el equipo, con Pts% y Ef%, y el reparto según recepción positiva, negativa y contraataque.
+- **Mapas de saque y ataque**: líneas de origen a destino coloreadas por resultado, cantidades por zona y filtro por jugador.
+
+### Cambiado
+- Pruebas automáticas: de 91 a 97.
+
 ## [0.3.2] — 2026-10-05
 
 Estadísticas al estilo del informe de Data Volley 4.

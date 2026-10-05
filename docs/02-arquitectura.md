@@ -43,10 +43,11 @@ El código está dividido en tres capas. Cada capa solo puede usar a las de abaj
 | `skills.ts` | Fundamentos, calidades, etiquetas, qué acciones dan punto, pares espejo |
 | `match-state.ts` | Reproduce los eventos y calcula marcador, sets, saque, ganador, rotaciones, tiempos/cambios por set y avisos de carga |
 | `rotation.ts` | Formaciones: rotar, nombre de la rotación (P1–P6), validar formación |
+| `zones.ts` | Zonas de la cancha (1–9), nombres y textos de recorrido |
 | `code-parser.ts` | Interpreta los códigos de teclado (`7A#`) |
 | `stats.ts` | Cuenta acciones por jugador/equipo (puntos, BP, errores, sets jugados) |
 | `rallies.ts` | Agrupa los eventos en rallies; detecta recepción y ataque después de recepción (K1) |
-| `report.ts` | Análisis tipo informe de Data Volley: por set, ataque por fase, side-out por recepción, puntos regalados |
+| `report.ts` | Análisis tipo informe de Data Volley: por set, ataque por fase, distribución por zona, mapas, side-out por recepción, puntos regalados |
 | `metrics.ts` | Porcentajes (eficacia, positividad...) |
 | `factories.ts` | Crea equipos, partidos y eventos con valores correctos |
 | `ids.ts` | Identificadores únicos y fechas |
@@ -58,13 +59,15 @@ El código está dividido en tres capas. Cada capa solo puede usar a las de abaj
 | `repository.ts` | Leer/guardar/borrar equipos y partidos |
 | `export.ts` | Descargar un partido como JSON |
 | `import.ts` | Leer y validar un partido desde un JSON (+ pruebas en `import.test.ts`) |
+| `prefs.ts` | Preferencias de este dispositivo (cargar zonas sí/no) |
 
 ### `src/ui/`
 | Carpeta / archivo | Responsabilidad |
 |---|---|
 | `navigation.ts` | Lista de pantallas posibles |
 | `screens/` | Una pantalla por archivo (inicio, equipos, editor, nuevo partido, partido) |
-| `live/` | Partes de la pantalla de partido: marcador, botones, códigos, historial, estadísticas |
+| `live/` | Partes de la pantalla de partido: marcador, botones, códigos, historial, formación, zonas, estadísticas, mapas |
+| `court/` | Cancha dibujada en SVG (`Court.tsx`) y su geometría (`geometry.ts`) |
 | `hooks/useMatch.ts` | Carga un partido, calcula su estado y lo guarda tras cada cambio |
 | `components/Page.tsx` | Estructura común (barra superior + contenido) |
 | `format.ts` | Textos legibles para eventos y fechas |

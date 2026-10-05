@@ -4,7 +4,7 @@ Aplicación de **scouting y estadísticas de vóley en vivo**, inspirada en Data
 Funciona en el navegador (computadora, tablet o celular), **sin internet**, y guarda
 cada acción en el momento.
 
-> Estado: **v0.3.0 — rotaciones**. Ver [CHANGELOG](CHANGELOG.md) y la
+> Estado: **v0.4.0 — cancha y zonas**. Ver [CHANGELOG](CHANGELOG.md) y la
 > [hoja de ruta](docs/09-hoja-de-ruta.md).
 
 ## Qué hace hoy
@@ -22,7 +22,10 @@ cada acción en el momento.
 - Tiempos muertos y cambios, con contador por set.
 - Avisos de posibles errores de carga.
 - Deshacer la última acción (Ctrl+Z), o editar o borrar cualquiera del historial.
-- Estadísticas por jugador y por equipo, de todo el partido o por set, con side-out y break-point.
+- Zonas de origen y destino (tocando la cancha o con el código `7A#47`), mapas de saque y
+  ataque, y distribución del ataque por zona.
+- Estadísticas al estilo del informe de Data Volley: por jugador (con BP y V-P), por set,
+  ataque por fase (K1/K2), side-out según la recepción, rotaciones y puntos regalados.
 - Exportar e importar partidos en JSON como respaldo.
 
 ## Empezar rápido

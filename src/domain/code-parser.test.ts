@@ -46,6 +46,32 @@ describe('parseCode', () => {
     expect(parseCode('c7:7').ok).toBe(false);
   });
 
+  it('interpreta zonas de origen y destino al final', () => {
+    expect(parseCode('7A#47')).toMatchObject({ ok: true, value: { playerNumber: 7, startZone: 4, endZone: 7 } });
+    expect(parseCode('a12S+1')).toMatchObject({ ok: true, value: { startZone: 1 } });
+    expect(parseCode('7A#~7')).toEqual({
+      ok: true,
+      value: { kind: 'action', team: 'home', playerNumber: 7, skill: 'A', quality: '#', endZone: 7 },
+    });
+    // Sin zonas no aparecen las propiedades
+    expect(parseCode('7A#')).toEqual({
+      ok: true,
+      value: { kind: 'action', team: 'home', playerNumber: 7, skill: 'A', quality: '#' },
+    });
+  });
+
+  it('rechaza zonas que no existen', () => {
+    expect(parseCode('7A#40')).toMatchObject({ ok: false, error: expect.stringContaining('zona 0') });
+    expect(parseCode('7A#475').ok).toBe(false);
+  });
+
+  it('el saque sin número también acepta zonas', () => {
+    expect(parseCode('S+16', { servingTeam: 'home', servers: { home: 5 } })).toMatchObject({
+      ok: true,
+      value: { playerNumber: 5, skill: 'S', startZone: 1, endZone: 6 },
+    });
+  });
+
   it('rechaza códigos mal formados', () => {
     expect(parseCode('').ok).toBe(false);
     expect(parseCode('A#').ok).toBe(false);

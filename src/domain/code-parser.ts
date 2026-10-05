@@ -2,8 +2,9 @@
  * Intérprete de códigos de scouting escritos con el teclado.
  * Gramática completa en docs/05-codigos-de-scouting.md.
  *
- *   [equipo] número fundamento calidad     →  "7A#", "a12R+", "*4S="
- *   [equipo] S calidad                     →  "S+"     (saque del jugador en P1; requiere formación)
+ *   [equipo] número fundamento calidad [origen] [destino]
+ *                                          →  "7A#", "a12R+", "*4S=", "7A#47" (de zona 4 a zona 7)
+ *   [equipo] S calidad [origen] [destino]  →  "S+", "S+16" (saque del jugador en P1; requiere formación)
  *   [equipo] p                             →  "ap"     (punto manual)
  *   [equipo] T                             →  "aT"     (tiempo muerto)
  *   [equipo] c sale:entra                  →  "c7:12"  (cambio)
@@ -20,13 +21,22 @@ import { validateLineup } from './rotation';
 import { QUALITIES, SKILLS } from './skills';
 import type { Match, Quality, Skill, TeamSide } from './types';
 import { otherSide } from './types';
+import { isZone, type Zone } from './zones';
 
 /**
  * Lo que el usuario quiere registrar, antes de convertirlo en evento.
  * Lo producen tanto los códigos de teclado como los botones.
  */
 export type ParsedCode =
-  | { kind: 'action'; team: TeamSide; playerNumber: number; skill: Skill; quality: Quality }
+  | {
+      kind: 'action';
+      team: TeamSide;
+      playerNumber: number;
+      skill: Skill;
+      quality: Quality;
+      startZone?: Zone;
+      endZone?: Zone;
+    }
   | { kind: 'point'; team: TeamSide }
   | { kind: 'timeout'; team: TeamSide }
   | { kind: 'substitution'; team: TeamSide; playerOut: number; playerIn: number }
@@ -44,10 +54,28 @@ export interface ParseContext {
   servers?: Partial<Record<TeamSide, number>>;
 }
 
-const ACTION_RE = /^(\d{1,2})([a-z])(.)$/i;
-/** Saque sin número ("S+"): el sacador sale de la formación. */
-const SERVE_NO_NUMBER_RE = /^s(.)$/i;
+/**
+ * número + fundamento + calidad (no puede ser un dígito) + zonas opcionales.
+ * El origen puede ser "~" para indicar solo el destino ("7A#~7").
+ */
+const ACTION_RE = /^(\d{1,2})([a-z])([^\d~])([\d~])?(\d)?$/i;
+/** Saque sin número ("S+", "S+16"): el sacador sale de la formación. */
+const SERVE_NO_NUMBER_RE = /^s([^\d~])([\d~])?(\d)?$/i;
 const SUBSTITUTION_RE = /^c(\d{1,2})[:.](\d{1,2})$/i;
+
+type ZonesResult = { ok: true; zones: { startZone?: Zone; endZone?: Zone } } | { ok: false; error: string };
+
+/** Convierte los dígitos de zona del código (opcionales) en zonas válidas. */
+function parseZones(start?: string, end?: string): ZonesResult {
+  const zones: { startZone?: Zone; endZone?: Zone } = {};
+  for (const [key, digit] of [['startZone', start], ['endZone', end]] as const) {
+    if (digit === undefined || digit === '~') continue;
+    const n = Number(digit);
+    if (!isZone(n)) return { ok: false, error: `La zona ${digit} no existe: las zonas van de 1 a 9` };
+    zones[key] = n;
+  }
+  return { ok: true, zones };
+}
 
 /** Equipo por defecto cuando el código no tiene prefijo. */
 function defaultTeam(skill: Skill, context?: ParseContext): TeamSide {
@@ -89,12 +117,17 @@ export function parseCode(input: string, context?: ParseContext): ParseResult {
     if (!QUALITIES.includes(quality)) {
       return { ok: false, error: `Calidad "${quality}" desconocida. Usa ${QUALITIES.join(' ')}` };
     }
+    const zones = parseZones(serve[2], serve[3]);
+    if (!zones.ok) return zones;
     const serveTeam = explicitTeam ?? context?.servingTeam ?? 'home';
     const server = context?.servers?.[serveTeam];
     if (server === undefined) {
       return { ok: false, error: 'Sin formación cargada, el saque necesita el número del jugador (ej. 5S+)' };
     }
-    return { ok: true, value: { kind: 'action', team: serveTeam, playerNumber: server, skill: 'S', quality } };
+    return {
+      ok: true,
+      value: { kind: 'action', team: serveTeam, playerNumber: server, skill: 'S', quality, ...zones.zones },
+    };
   }
 
   // 4) Acción de jugador
@@ -112,9 +145,18 @@ export function parseCode(input: string, context?: ParseContext): ParseResult {
   if (!QUALITIES.includes(quality)) {
     return { ok: false, error: `Calidad "${quality}" desconocida. Usa ${QUALITIES.join(' ')}` };
   }
+  const zones = parseZones(m[4], m[5]);
+  if (!zones.ok) return zones;
   return {
     ok: true,
-    value: { kind: 'action', team: explicitTeam ?? defaultTeam(skill, context), playerNumber, skill, quality },
+    value: {
+      kind: 'action',
+      team: explicitTeam ?? defaultTeam(skill, context),
+      playerNumber,
+      skill,
+      quality,
+      ...zones.zones,
+    },
   };
 }
 

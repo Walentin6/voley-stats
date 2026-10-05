@@ -4,6 +4,7 @@ import type { RallyWarning } from '../domain/match-state';
 import { SUBSTITUTIONS_PER_SET, TIMEOUTS_PER_SET } from '../domain/match-state';
 import { QUALITY_LABELS, SKILL_LABELS } from '../domain/skills';
 import type { Match, MatchEvent, TeamSide } from '../domain/types';
+import { routeLabel } from '../domain/zones';
 
 export function playerLabel(match: Match, side: TeamSide, number: number): string {
   const p = match[side].players.find((x) => x.number === number);
@@ -28,7 +29,10 @@ export function describeCode(match: Match, code: ParsedCode): string {
     case 'action': {
       const skill = SKILL_LABELS[code.skill];
       const quality = QUALITY_LABELS[code.skill][code.quality];
-      return `${team} · ${playerLabel(match, code.team, code.playerNumber)} · ${skill}: ${quality}`;
+      const route = routeLabel(code.startZone, code.endZone);
+      return `${team} · ${playerLabel(match, code.team, code.playerNumber)} · ${skill}: ${quality}${
+        route ? ` (${route})` : ''
+      }`;
     }
     case 'lineup':
       return `Formación ${team}: ${code.positions.map((n, i) => `P${i + 1} #${n}`).join(' · ')}`;
@@ -39,7 +43,15 @@ export function describeCode(match: Match, code: ParsedCode): string {
 export function eventToCode(event: MatchEvent): ParsedCode {
   switch (event.type) {
     case 'action':
-      return { kind: 'action', team: event.team, playerNumber: event.playerNumber, skill: event.skill, quality: event.quality };
+      return {
+        kind: 'action',
+        team: event.team,
+        playerNumber: event.playerNumber,
+        skill: event.skill,
+        quality: event.quality,
+        ...(event.startZone ? { startZone: event.startZone } : {}),
+        ...(event.endZone ? { endZone: event.endZone } : {}),
+      };
     case 'substitution':
       return { kind: 'substitution', team: event.team, playerOut: event.playerOut, playerIn: event.playerIn };
     case 'lineup':
@@ -68,7 +80,10 @@ export function eventCode(event: MatchEvent): string {
     case 'substitution':
       return `${prefix}c${event.playerOut}:${event.playerIn}`;
     case 'action':
-      return `${prefix}${event.playerNumber}${event.skill}${event.quality}`;
+      // Las zonas van al final; si solo hay destino, el origen se marca con "~" (como Data Volley).
+      return `${prefix}${event.playerNumber}${event.skill}${event.quality}${
+        event.startZone ?? (event.endZone ? '~' : '')
+      }${event.endZone ?? ''}`;
     case 'lineup':
       return `${prefix}formación`;
   }

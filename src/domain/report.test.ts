@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { computeMatchState } from './match-state';
 import { buildRallies, firstAttackAfterReception } from './rallies';
 import {
+  computeAttackDistribution,
   computeAttackPhases,
   computeErrorBreakdown,
   computeSetSummaries,
   computeSideOutByReception,
+  computeZoneMap,
 } from './report';
 import { computeTeamStats } from './stats';
 import { makeMatch, times, withCodes, withEvents } from './test-helpers';
@@ -131,6 +133,45 @@ describe('punto de bloqueo cargado después del ataque bloqueado', () => {
     const away = computeTeamStats(m, computeMatchState(m), 'away');
     expect(away.players.find((p) => p.playerNumber === 5)!.points).toBe(1);
     expect(away.pointsFromOpponent).toBe(0);
+  });
+});
+
+describe('zonas', () => {
+  it('distribución del ataque por zona de origen y fase', () => {
+    const m = withCodes(start(), [
+      '1S+', 'a2R#', 'a4A#47', // K1 positiva desde 4
+      'a1S+', '2R+', '4A+45', 'a3D+', 'a4A+25', '3D+', '7A#3', // local: K1+ desde 4; visita K2 desde 2; local K2 desde 3
+      '1S=', // el local pierde el saque
+      'a1S+', '2R-', '4A-4', 'a3D+', 'a12A#', // local K1- desde 4; visita K2 sin zona
+    ]);
+    const state = computeMatchState(m);
+    const home = computeAttackDistribution(m, state, 'home');
+    expect(home.map((r) => r.zone)).toEqual([4, 3]);
+    expect(home[0]!.all.total).toBe(2);
+    expect(home[0]!.k1Positive.total).toBe(1);
+    expect(home[0]!.k1Negative.total).toBe(1);
+    expect(home[1]!.k2.counts['#']).toBe(1);
+    const away = computeAttackDistribution(m, state, 'away');
+    expect(away.map((r) => r.zone)).toEqual([4, 2, null]);
+  });
+
+  it('mapa: agrupa recorridos por origen, destino y resultado', () => {
+    const m = withCodes(start(), ['5S#16', '5S+16', '5S=1', '5S+15', '5S+~6']);
+    const map = computeZoneMap(m, computeMatchState(m), 'home', 'S');
+    expect(map.total).toBe(5);
+    expect(map.withZones).toBe(5);
+    expect(map.startCounts).toEqual({ 1: 4 });
+    expect(map.endCounts).toEqual({ 6: 3, 5: 1 });
+    expect(map.routes).toContainEqual({ start: 1, end: 6, outcome: 'point', count: 1 });
+    expect(map.routes).toContainEqual({ start: 1, end: 6, outcome: 'other', count: 1 });
+    expect(map.routes).toContainEqual({ start: null, end: 6, outcome: 'other', count: 1 });
+  });
+
+  it('mapa: filtra por jugador y cuenta el ace por recepción fallada como punto', () => {
+    const m = withCodes(start(), ['5S+16', 'a2R=', '7S+15']);
+    const map = computeZoneMap(m, computeMatchState(m), 'home', 'S', 'all', 5);
+    expect(map.total).toBe(1);
+    expect(map.routes).toEqual([{ start: 1, end: 6, outcome: 'point', count: 1 }]);
   });
 });
 

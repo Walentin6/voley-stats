@@ -3,8 +3,10 @@ import type { ParsedCode } from '../../domain/code-parser';
 import { computeMatchState, needsTiebreakServeChoice, setHasPlay } from '../../domain/match-state';
 import { eventFromCode } from '../../domain/factories';
 import { lastLineup } from '../../domain/rotation';
-import type { TeamSide } from '../../domain/types';
+import type { ActionEvent, TeamSide } from '../../domain/types';
+import { ZONED_SKILLS } from '../../domain/zones';
 import { downloadJson, matchFilename } from '../../storage/export';
+import { getPrefs, savePrefs } from '../../storage/prefs';
 import { Page } from '../components/Page';
 import { useMatch } from '../hooks/useMatch';
 import { ActionPad } from '../live/ActionPad';
@@ -13,6 +15,7 @@ import { EventLog } from '../live/EventLog';
 import { LineupEditor } from '../live/LineupEditor';
 import { Scoreboard } from '../live/Scoreboard';
 import { StatsView } from '../live/StatsView';
+import { ZonePicker } from '../live/ZonePicker';
 import type { Navigate } from '../navigation';
 
 type Tab = 'entry' | 'stats';
@@ -29,6 +32,10 @@ export function LiveMatchScreen({ navigate, matchId }: { navigate: Navigate; mat
   const [editingLineup, setEditingLineup] = useState<TeamSide | null>(null);
   /** Set en el que se eligió "Seguir sin formación". */
   const [skippedLineupSet, setSkippedLineupSet] = useState<number | null>(null);
+  /** Cargar zonas con la cancha (preferencia de este dispositivo). */
+  const [zonesEnabled, setZonesEnabled] = useState(() => getPrefs().zonesEnabled);
+  /** Acción a la que se le están cargando las zonas. */
+  const [zoneTargetId, setZoneTargetId] = useState<string | null>(null);
   const codeInputRef = useRef<HTMLInputElement>(null);
   const goHome = () => navigate({ name: 'home' });
 
@@ -65,8 +72,28 @@ export function LiveMatchScreen({ navigate, matchId }: { navigate: Navigate; mat
     // el partido puede terminar en medio de la lista.
     const latest = getLatest();
     if (!latest || computeMatchState(latest).finished) return;
-    addEvent(eventFromCode(code));
+    const event = eventFromCode(code);
+    addEvent(event);
+    // Con "Zonas" activado, después de un saque o ataque sin zonas aparece la cancha.
+    if (event.type === 'action' || event.type === 'point') {
+      const wantsZones =
+        zonesEnabled &&
+        event.type === 'action' &&
+        ZONED_SKILLS.includes(event.skill) &&
+        !event.startZone &&
+        !event.endZone;
+      setZoneTargetId(wantsZones ? event.id : null);
+    }
   }
+
+  function toggleZones() {
+    const next = !zonesEnabled;
+    setZonesEnabled(next);
+    savePrefs({ ...getPrefs(), zonesEnabled: next });
+    if (!next) setZoneTargetId(null);
+  }
+
+  const zoneTarget = match.events.find((e): e is ActionEvent => e.id === zoneTargetId && e.type === 'action');
 
   const winnerName = state.winner ? match[state.winner].name : '';
   const askTiebreakServe = needsTiebreakServeChoice(match, state);
@@ -169,10 +196,28 @@ export function LiveMatchScreen({ navigate, matchId }: { navigate: Navigate; mat
       {tab === 'entry' ? (
         <>
           <CodeInput match={match} disabled={entryDisabled} onRecord={record} inputRef={codeInputRef} />
+          {zoneTarget && (
+            <ZonePicker
+              key={zoneTarget.id}
+              match={match}
+              event={zoneTarget}
+              onChange={(zones) => {
+                const { startZone: _s, endZone: _e, ...rest } = zoneTarget;
+                replaceEvent({
+                  ...rest,
+                  ...(zones.startZone ? { startZone: zones.startZone } : {}),
+                  ...(zones.endZone ? { endZone: zones.endZone } : {}),
+                });
+              }}
+              onClose={() => setZoneTargetId(null)}
+            />
+          )}
           <ActionPad
             match={match}
             state={state}
             disabled={entryDisabled}
+            zonesEnabled={zonesEnabled}
+            onToggleZones={toggleZones}
             onRecord={record}
             onUndo={undoLast}
             onEditLineup={(side) => setEditingLineup(side)}

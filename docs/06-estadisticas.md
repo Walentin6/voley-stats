@@ -18,6 +18,8 @@ Cuando no hay acciones para calcular un porcentaje, se muestra `–`.
 | Jugadores | La tabla principal del informe (ver abajo) |
 | Por set | Marcador, duración y de dónde salieron los puntos en cada set |
 | Ataque por fase | Ataque después de recepción (K1) y contraataque (K2) |
+| Distribución del ataque por zona | Desde qué zonas ataca el equipo, según la fase (requiere zonas) |
+| Mapas de saque y ataque | Líneas de origen a destino sobre la cancha (requiere zonas) |
 | Side-out según la recepción | % de rallies ganados según cómo se recibió |
 | Por rotación | Side-out, break-point y saldo de cada rotación (con formación) |
 | Puntos regalados | Errores que le dieron el punto al rival, por tipo |
@@ -140,6 +142,39 @@ Para que esta tabla sea completa, hay que cargar la **recepción** y los **ataqu
 rally. Si falta la recepción, el ataque cuenta como K1 pero no entra en "positiva" ni
 "negativa".
 
+## Distribución del ataque por zona
+
+Es la "distribución del armador" de Data Volley: desde qué **zona de origen** atacó el
+equipo. Requiere cargar la zona de origen de los ataques.
+
+| Columna | Cálculo |
+|---|---|
+| Tot | Ataques desde esa zona (y % del total de ataques) |
+| Pts% / Ef% | Como en la tabla de jugadores, solo de esa zona |
+| K1 rec. + | De los ataques **después de recepción positiva**, % que salió de esa zona |
+| K1 rec. − | Lo mismo después de **recepción negativa** |
+| K2 | Lo mismo en **contraataque** |
+
+Ejemplo de lectura: con recepción positiva el armador reparte 40% a zona 4, 30% a zona 3 y
+30% a zona 2; con recepción negativa sube a 70% en zona 4 (la pelota "de seguridad").
+
+Las filas van en el orden de Data Volley: 4, 3, 2 (delanteros), 1, 6, 5 (zagueros) y
+"Sin zona" al final.
+
+## Mapas de saque y ataque
+
+Sobre la cancha dibujada:
+- A la **izquierda**, la cancha del equipo elegido, con cuántas acciones salieron de cada
+  zona.
+- A la **derecha**, la cancha rival, con cuántas pelotas llegaron a cada zona. Cuanto más
+  oscura, más pelotas.
+- Cada **línea** va de la zona de origen a la de destino: **verde** = punto (incluye el ace
+  por recepción fallada), **rojo** = error (`=` o ataque bloqueado), **gris** = el rally
+  siguió. El grosor indica cuántas veces se repitió ese recorrido.
+
+Se puede elegir **Saque** o **Ataque** y filtrar por **jugador**. Las acciones con solo
+destino suman en la cancha rival pero no dibujan línea.
+
 ## Side-out según la recepción
 
 Para cada calidad de recepción, cuántos rallies jugó el equipo recibiendo y cuántos ganó.
@@ -177,8 +212,9 @@ Un atacante con 10 ataques: 4 puntos (`#`), 1 error (`=`), 1 bloqueado (`/`), 4 
 
 | Data Volley 4 | VoleyStats |
 |---|---|
-| Tipo de ataque (combinaciones, zonas) y distribución del armador | ❌ Requiere zonas (etapa 4) |
-| Mapas de dirección de saque y ataque | ❌ Etapa 4 |
+| Zonas, mapas de dirección y distribución del ataque | ✅ (v0.4) |
+| Subzonas (A–D), tipo de golpe y combinaciones de ataque | ❌ Pendiente |
+| Recepción por zona (dónde se recibe mejor o peor) | ❌ Pendiente |
 | Estadísticas de varios partidos (temporada) | ❌ Etapa 5 |
 | Informe imprimible (PDF) | ❌ Etapa 7 |
 | Marcadores parciales y "voto" del jugador | ❌ |

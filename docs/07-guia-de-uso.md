@@ -65,6 +65,23 @@ quién saca.
 Puedes escribir un rally entero: `1S+ 3R- a14A/ 9B#`. Guía completa en
 [05 — Códigos de scouting](05-codigos-de-scouting.md).
 
+### Zonas (opcional)
+Para los mapas y la distribución del ataque, se puede marcar **de dónde salió y a dónde
+fue** cada saque y ataque:
+
+- **Con la cancha:** activa el botón **Zonas: Sí** (abajo del panel de botones; la app lo
+  recuerda en este dispositivo). Después de cada saque o ataque aparece la cancha:
+  1. Toca la **zona de origen** en la cancha del equipo que sacó o atacó.
+  2. Toca la **zona de destino** en la cancha rival. La cancha se cierra sola.
+
+  Si no sabes el origen, pulsa **Sin origen →**. Si no quieres marcar nada, pulsa
+  **Omitir** o simplemente carga la acción siguiente: la cancha pasa a esa.
+- **Con el código:** agrega las zonas al final: `7A#47` (de 4 a 7), `S+16`.
+- **Después:** en el editor (✎) de cada acción se pueden poner o corregir las zonas.
+
+Las zonas se numeran desde cada equipo mirando a la red (4-3-2 adelante, 7-8-9 al
+medio, 5-6-1 atrás). En la cancha dibujada el local está siempre a la izquierda.
+
 ### Puntos sin acción
 Usa **+ Punto** (debajo de los jugadores de cada equipo) cuando el rival comete una falta
 que no quieres registrar (rotación, red, toque doble...) o cuando te perdiste el rally.

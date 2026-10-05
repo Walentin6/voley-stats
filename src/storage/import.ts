@@ -5,6 +5,7 @@
  */
 import { nowIso } from '../domain/ids';
 import { QUALITIES, SKILLS } from '../domain/skills';
+import { isZone } from '../domain/zones';
 import type { Match, MatchEvent, MatchTeam, Player, Position, Quality, Skill, TeamSide } from '../domain/types';
 
 export type ImportResult = { ok: true; match: Match } | { ok: false; error: string };
@@ -84,7 +85,20 @@ function parseEvent(value: unknown, where: string): MatchEvent {
       const quality = o.quality as Quality;
       if (!SKILLS.includes(skill)) fail(`${where}: fundamento inválido`);
       if (!QUALITIES.includes(quality)) fail(`${where}: calidad inválida`);
-      return { ...base, type, playerNumber: jersey(o.playerNumber, where), skill, quality };
+      const zone = (v: unknown, label: string) => {
+        if (v === undefined) return {};
+        if (!isZone(v)) fail(`${where}: ${label} inválida (debe ser de 1 a 9)`);
+        return { [label === 'zona de origen' ? 'startZone' : 'endZone']: v };
+      };
+      return {
+        ...base,
+        type,
+        playerNumber: jersey(o.playerNumber, where),
+        skill,
+        quality,
+        ...zone(o.startZone, 'zona de origen'),
+        ...zone(o.endZone, 'zona de destino'),
+      };
     }
   }
 }

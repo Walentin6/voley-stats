@@ -6,8 +6,8 @@ Las pruebas están en [`code-parser.test.ts`](../src/domain/code-parser.test.ts)
 ## Formato
 
 ```
-[equipo] número fundamento calidad      acción de un jugador
-[equipo] S calidad                      saque del jugador en P1 (requiere formación)
+[equipo] número fundamento calidad [origen] [destino]    acción de un jugador
+[equipo] S calidad [origen] [destino]                    saque del jugador en P1 (requiere formación)
 [equipo] p                              punto manual
 [equipo] T                              tiempo muerto
 [equipo] c sale:entra                   cambio de jugador
@@ -19,6 +19,8 @@ Las pruebas están en [`code-parser.test.ts`](../src/domain/code-parser.test.ts)
 | número | 0–99 (número de camiseta) | Sí, en acciones |
 | fundamento | `S` `R` `E` `A` `B` `D` `F` | Sí, en acciones |
 | calidad | `#` `+` `!` `-` `/` `=` | Sí, en acciones |
+| origen | Zona 1–9 en la cancha propia, o `~` si no se sabe | No |
+| destino | Zona 1–9 en la cancha rival | No |
 | `p` | Punto manual para ese equipo | — |
 | `T` | Tiempo muerto de ese equipo | — |
 | `c7:12` | Cambio: sale el 7, entra el 12 (también vale `c7.12`) | — |
@@ -54,6 +56,23 @@ la app sabe quién está en la posición 1, que es quien saca. Entonces alcanza 
 - Si ese equipo no tiene formación cargada, se pide el número (ej. `5S+`).
 - En una línea con varios códigos, cada `S` usa la rotación del momento:
   en `S+ a3R+ a4A# S-`, el segundo saque es del nuevo P1 del visitante, que acaba de rotar.
+
+## Zonas
+
+Después de la calidad se pueden agregar **una o dos cifras**: la zona de origen y la de
+destino (ver "Zonas" en [04 — Reglas de juego](04-reglas-de-juego.md)).
+
+| Código | Significado |
+|---|---|
+| `7A#47` | Ataque punto del 7 desde zona 4 hacia zona 7 del rival |
+| `7A#4` | Ataque punto desde zona 4 (destino sin cargar) |
+| `7A#~7` | Ataque punto hacia zona 7 (origen sin cargar) |
+| `S+16` | Saque bueno del P1 desde zona 1 hacia zona 6 del rival |
+| `a12S=5` | Error de saque del 12 visitante desde zona 5 |
+
+Las zonas van de 1 a 9; un `0` o una tercera cifra dan error. Si están activadas las
+**Zonas** en la carga y un saque o ataque se escribe **sin** zonas, aparece la cancha
+para marcarlas con el dedo; si ya vienen en el código, no aparece.
 
 ## Ejemplos
 
@@ -95,12 +114,13 @@ aparece además un aviso ⚠ en naranja. Ver "Avisos de carga" en
 
 Data Volley usa un código mucho más rico, por ejemplo `*7AH#V5~47C`:
 
-| Parte | Data Volley | VoleyStats v0.3 |
+| Parte | Data Volley | VoleyStats v0.4 |
 |---|---|---|
 | Equipo, número, fundamento, calidad | ✅ | ✅ |
-| Tipo de golpe (H alta, M media, Q rápida, T tensa...) | ✅ | ❌ Próxima etapa |
+| Tipo de golpe (H alta, M media, Q rápida, T tensa...) | ✅ | ❌ Pendiente |
 | Combinación de ataque (V5, X1...) | ✅ | ❌ |
-| Zonas de origen/destino (`47`) y subzonas (`C`) | ✅ | ❌ Etapa "cancha" |
+| Zonas de origen/destino (`47`) | ✅ | ✅ (v0.4) |
+| Subzonas (`C`) | ✅ | ❌ Pendiente |
 | Llamada del armador (K1, K2...) | ✅ | ❌ |
 | Tiempos muertos y cambios | ✅ | ✅ (`T`, `c7:12`) |
 | Formación y rotaciones | ✅ (con códigos) | ✅ (con botones; sin código) |

@@ -10,12 +10,23 @@ import { QUALITIES, QUALITY_LABELS, SKILL_LABELS, SKILLS } from '../../domain/sk
 import type { Match, TeamSide } from '../../domain/types';
 import { describeCode, eventToCode } from '../format';
 import type { MatchEvent } from '../../domain/types';
+import { ZONES, type Zone } from '../../domain/zones';
 
 interface Props {
   match: Match;
   event: MatchEvent;
   onSave: (code: ParsedCode) => void;
   onCancel: () => void;
+}
+
+type ActionCode = Extract<ParsedCode, { kind: 'action' }>;
+
+/** Pone o quita una zona (sin dejar la propiedad con valor undefined). */
+function withZone(draft: ActionCode, key: 'startZone' | 'endZone', zone: Zone | undefined): ActionCode {
+  const next = { ...draft };
+  if (zone) next[key] = zone;
+  else delete next[key];
+  return next;
 }
 
 function problemOf(match: Match, draft: ParsedCode): string | null {
@@ -40,6 +51,20 @@ export function EventEditor({ match, event, onSave, onCancel }: Props) {
         {roster(draft.team).map((p) => (
           <option key={p.id} value={p.number}>
             #{p.number} {p.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+
+  const zoneSelect = (label: string, value: Zone | undefined, onChange: (z: Zone | undefined) => void) => (
+    <label className="field inline">
+      <span>{label}</span>
+      <select value={value ?? ''} onChange={(e) => onChange(e.target.value ? (Number(e.target.value) as Zone) : undefined)}>
+        <option value="">–</option>
+        {ZONES.map((z) => (
+          <option key={z} value={z}>
+            {z}
           </option>
         ))}
       </select>
@@ -92,6 +117,10 @@ export function EventEditor({ match, event, onSave, onCancel }: Props) {
                 </button>
               ))}
             </div>
+          </div>
+          <div className="editor-row">
+            {zoneSelect('Zona de origen', draft.startZone, (z) => setDraft(withZone(draft, 'startZone', z)))}
+            {zoneSelect('Zona de destino', draft.endZone, (z) => setDraft(withZone(draft, 'endZone', z)))}
           </div>
           <div className="editor-row">
             <span className="editor-label">Resultado</span>

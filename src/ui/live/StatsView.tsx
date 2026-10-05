@@ -16,6 +16,7 @@ import {
   sideOutPct,
 } from '../../domain/metrics';
 import {
+  computeAttackDistribution,
   computeAttackPhases,
   computeErrorBreakdown,
   computeSetSummaries,
@@ -31,6 +32,7 @@ import {
   type StatLine,
 } from '../../domain/stats';
 import type { Match, TeamSide } from '../../domain/types';
+import { ZoneMapView } from './ZoneMapView';
 
 interface Props {
   match: Match;
@@ -270,6 +272,65 @@ function AttackPhasesTable({ match, state, side, filter }: TeamProps) {
 }
 
 // ---------------------------------------------------------------------------
+// Distribución del ataque por zona
+// ---------------------------------------------------------------------------
+
+function AttackDistributionTable({ match, state, side, filter }: TeamProps) {
+  const rows = computeAttackDistribution(match, state, side, filter);
+  if (rows.length === 0) return <p className="muted small">Todavía no hay ataques.</p>;
+  if (rows.every((r) => r.zone === null)) {
+    return (
+      <p className="muted small">
+        Los ataques no tienen zona de origen. Activa "Zonas" en la carga o escribe la zona al final del código (ej.
+        7A#4).
+      </p>
+    );
+  }
+  const sum = (key: 'all' | 'k1Positive' | 'k1Negative' | 'k2') => rows.reduce((a, r) => a + r[key].total, 0);
+  const totals = { all: sum('all'), k1Positive: sum('k1Positive'), k1Negative: sum('k1Negative'), k2: sum('k2') };
+  const share = (n: number, total: number) => (n === 0 ? '' : `${formatPct(ratio(n, total))} (${n})`);
+
+  return (
+    <div className="table-scroll">
+      <table className="stats-table">
+        <thead>
+          <tr>
+            <th rowSpan={2}>Zona de origen</th>
+            <th colSpan={3} className="grp">Todos los ataques</th>
+            <th colSpan={3} className="grp">Distribución (% de ataques por zona)</th>
+          </tr>
+          <tr>
+            <th className="grp">Tot</th>
+            <th>Pts%</th>
+            <th>Ef%</th>
+            <th className="grp" title="Ataque después de recepción positiva (# +)">K1 rec. +</th>
+            <th title="Ataque después de recepción negativa (! - /)">K1 rec. −</th>
+            <th title="Contraataque">K2</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.zone ?? 'none'}>
+              <td className="player-cell">
+                {r.zone ? <strong>Zona {r.zone}</strong> : <span className="muted">Sin zona</span>}
+              </td>
+              <td className="grp">
+                {r.all.total} <span className="muted small">({formatPct(ratio(r.all.total, totals.all))})</span>
+              </td>
+              <td className="strong">{formatPct(attackKill(r.all))}</td>
+              <td>{formatPct(attackEfficiency(r.all))}</td>
+              <td className="grp">{share(r.k1Positive.total, totals.k1Positive)}</td>
+              <td>{share(r.k1Negative.total, totals.k1Negative)}</td>
+              <td>{share(r.k2.total, totals.k2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Side-out según la recepción
 // ---------------------------------------------------------------------------
 
@@ -455,6 +516,20 @@ function TeamReport({ match, state, side, filter }: TeamProps) {
         note="K1 = primer ataque después de recibir el saque, antes de que el rival toque la pelota. K2 = cualquier otro ataque (contraataque o transición)."
       >
         <AttackPhasesTable {...props} />
+      </Section>
+
+      <Section
+        title="Distribución del ataque por zona"
+        note="Desde qué zonas ataca el equipo y con qué eficacia. Las columnas K1 muestran adónde va la pelota según la recepción (la distribución del armador); K2 es el contraataque. Zonas: 4 punta, 3 centro, 2 opuesto, 1-6-5 zagueros."
+      >
+        <AttackDistributionTable {...props} />
+      </Section>
+
+      <Section
+        title="Mapas de saque y ataque"
+        note="Cada línea va de la zona de origen (cancha propia, a la izquierda) a la de destino (cancha rival). El grosor indica cuántas veces. Las zonas usan la numeración de cada equipo mirando a la red."
+      >
+        <ZoneMapView match={match} state={state} side={side} filter={filter} />
       </Section>
 
       <Section
