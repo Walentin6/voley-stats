@@ -44,7 +44,9 @@ El código está dividido en tres capas. Cada capa solo puede usar a las de abaj
 | `match-state.ts` | Reproduce los eventos y calcula marcador, sets, saque, ganador, rotaciones, tiempos/cambios por set y avisos de carga |
 | `rotation.ts` | Formaciones: rotar, nombre de la rotación (P1–P6), validar formación |
 | `code-parser.ts` | Interpreta los códigos de teclado (`7A#`) |
-| `stats.ts` | Cuenta acciones por jugador/equipo |
+| `stats.ts` | Cuenta acciones por jugador/equipo (puntos, BP, errores, sets jugados) |
+| `rallies.ts` | Agrupa los eventos en rallies; detecta recepción y ataque después de recepción (K1) |
+| `report.ts` | Análisis tipo informe de Data Volley: por set, ataque por fase, side-out por recepción, puntos regalados |
 | `metrics.ts` | Porcentajes (eficacia, positividad...) |
 | `factories.ts` | Crea equipos, partidos y eventos con valores correctos |
 | `ids.ts` | Identificadores únicos y fechas |

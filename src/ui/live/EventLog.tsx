@@ -49,9 +49,10 @@ export function EventLog({ match, state, onDelete, onReplace }: Props) {
               <code className="event-code">{eventCode(ev)}</code>
               <span className="event-desc">
                 {describeEvent(match, ev)}
-                {info?.mirrorOf && <em className="muted"> (mismo punto, no suma)</em>}
+                {info?.mirrorOf && !info.creditsPoint && <em className="muted"> (mismo punto, no suma)</em>}
+                {info?.mirrorOf && info.creditsPoint && <em className="muted"> (mismo punto: el punto es de esta acción)</em>}
                 {info?.impliedAce && <em className="muted"> (cuenta como ace: el rival falló la recepción)</em>}
-                {info?.aceOf && <em className="muted"> (punto de saque)</em>}
+                {info?.creditedTo && <em className="muted"> (el punto se le acredita a la acción del rival)</em>}
                 {info?.afterEnd && <em className="muted"> (después del final)</em>}
                 {info?.warnings.map((w) => (
                   <span key={w} className="event-warning small warn">

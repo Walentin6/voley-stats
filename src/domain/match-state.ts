@@ -78,8 +78,14 @@ export interface EventInfo {
    * Como en Data Volley, ese saque cuenta como ace en las estadísticas.
    */
   impliedAce?: true;
-  /** Solo en recepciones con error: id del saque que se convierte en ace por esta recepción. */
-  aceOf?: string;
+  /**
+   * El punto lo ganó el rival con este evento (un error), pero en las estadísticas
+   * se le acredita a otra acción del rival: el saque (ace por recepción fallada) o
+   * el bloqueo (A/ seguido de B#). Es el id de esa acción.
+   */
+  creditedTo?: string;
+  /** Esta acción se lleva el punto en las estadísticas aunque el marcador lo cambió otra. */
+  creditsPoint?: true;
 }
 
 export interface MatchState {
@@ -169,8 +175,19 @@ export function computeMatchState(match: Match): MatchState {
 
     // ¿Es el "espejo" del punto anterior? Entonces no suma otra vez.
     if (pointTo && event.type === 'action' && lastPoint && isMirrorPair(lastPoint.event, event)) {
-      info[event.id] = { ...lastPoint.info, pointTo: null, mirrorOf: lastPoint.event.id, warnings: [] };
+      const mirrorInfo: EventInfo = { ...lastPoint.info, pointTo: null, mirrorOf: lastPoint.event.id, warnings: [] };
+      delete mirrorInfo.creditedTo;
+      delete mirrorInfo.creditsPoint;
+      delete mirrorInfo.impliedAce;
+      // Si el espejo es la acción del equipo que ganó (ej. "A/" y después "B#"),
+      // el punto se le acredita a ella: es un punto de bloqueo, no un error del rival.
+      if (event.team === lastPoint.info.pointTo) {
+        mirrorInfo.creditsPoint = true;
+        lastPoint.info.creditedTo = event.id;
+      }
+      info[event.id] = mirrorInfo;
       lastPoint = null;
+      lastServe = null;
       continue;
     }
 
@@ -265,7 +282,8 @@ export function computeMatchState(match: Match): MatchState {
       lastServe.event.team !== event.team
     ) {
       lastServe.info.impliedAce = true;
-      eventInfo.aceOf = lastServe.event.id;
+      lastServe.info.creditsPoint = true;
+      eventInfo.creditedTo = lastServe.event.id;
     }
     // Recordar el saque del rally, si fue la última acción (los tiempos y cambios no cuentan).
     lastServe =

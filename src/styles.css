@@ -845,6 +845,42 @@ button:focus-visible {
   flex-direction: column;
   gap: 0.5rem;
 }
+.stats-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.stats-controls .chip {
+  font-size: 0.9rem;
+  padding: 0.35rem 0.9rem;
+}
+.team-report {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.stats-section h3 {
+  margin: 1rem 0 0.4rem;
+}
+.stats-section > p {
+  margin: 0.35rem 0 0;
+}
+.table-scroll.narrow {
+  max-width: 420px;
+}
+.stats-table .sets-cell {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.stats-table tr.did-not-play td {
+  color: var(--muted);
+  opacity: 0.6;
+}
+.stats-table tr.sub-row td {
+  font-size: 0.8rem;
+}
 .team-heading.home {
   color: var(--home);
 }

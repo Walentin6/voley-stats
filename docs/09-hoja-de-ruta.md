@@ -33,6 +33,15 @@ Cada etapa produce una versión usable. El orden puede cambiar según lo que pid
 - [ ] Registrar entradas y salidas del líbero (si hace falta en el futuro).
 - [ ] Recepción y ataque por rotación.
 
+## ✅ Estadísticas estilo Data Volley (v0.3.1 – v0.3.2) — *terminada*
+- [x] Ace por recepción fallada, Pos% de saque.
+- [x] Por jugador: sets jugados, BP, V-P.
+- [x] Resumen por set (marcador, duración, origen de los puntos, side-out y break-point).
+- [x] Ataque por fase: K1 (por recepción positiva/negativa) y contraataque.
+- [x] Side-out según la calidad de recepción.
+- [x] Puntos regalados por tipo de error.
+- [x] El punto de un par espejo se acredita a la acción del equipo que lo ganó.
+
 ## Etapa 4 — Cancha y zonas (v0.4)
 - [ ] Marcar zona de origen y destino haciendo clic en un dibujo de la cancha.
 - [ ] Ampliar los códigos: tipo de golpe, zonas, subzonas (compatible con Data Volley).

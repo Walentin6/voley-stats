@@ -5,6 +5,25 @@ Las versiones siguen [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [0.3.2] — 2026-10-05
+
+Estadísticas al estilo del informe de Data Volley 4.
+
+### Agregado
+- Pestaña de estadísticas reorganizada como el informe de Data Volley: se elige el equipo y el set, y se ven todas las secciones.
+- Por jugador: **sets jugados**, **BP** (puntos ganados sacando) y **V-P** (puntos − errores).
+- **Por set**: marcador, duración, puntos de ace, ataque, bloqueo y errores del rival, side-out y break-point.
+- **Ataque por fase**: después de recepción (K1, separado por recepción positiva y negativa) y contraataque (K2).
+- **Side-out según la recepción**: % de rallies ganados según la calidad de la recepción.
+- **Puntos regalados**: errores que le dieron el punto al rival, por tipo.
+- Indicador "Puntos regalados" junto a side-out y break-point.
+
+### Cambiado
+- El orden de las columnas de saque, recepción y ataque sigue el de Data Volley (Tot, Err, ...).
+- En un par espejo, el punto se le acredita a la acción del equipo que lo ganó. Antes, en `4A/ a10B#` el punto quedaba como "error del rival" y el bloqueador no sumaba.
+- El servidor de desarrollo revisa los archivos periódicamente (en Windows a veces no detectaba los cambios).
+- Pruebas automáticas: de 79 a 91.
+
 ## [0.3.1] — 2026-10-05
 
 ### Agregado

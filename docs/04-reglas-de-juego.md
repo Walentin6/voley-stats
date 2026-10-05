@@ -62,8 +62,10 @@ el punto se cuenta **una sola vez**:
 
 Condiciones: las dos acciones son de **equipos distintos**, forman uno de estos pares
 (en cualquier orden) y van **una justo después de la otra**. En el historial, la segunda
-aparece como *"(mismo punto, no suma)"*. Las dos cuentan en las estadísticas de su
-fundamento, pero el punto lo tiene solo la primera.
+aparece como *"(mismo punto…)"*. Las dos cuentan en las estadísticas de su fundamento,
+y el punto se le acredita a la acción del **equipo que lo ganó** (ace, ataque o bloqueo),
+sin importar en qué orden se cargaron. Por ejemplo, en `4A/ a10B#` el punto es del
+bloqueador #10, no un "error del rival".
 
 **Excepción:** un saque nunca es espejo de la acción anterior, porque un saque siempre
 empieza un rally nuevo. Así, `a2R=` (rally que terminó en error de recepción) seguido de

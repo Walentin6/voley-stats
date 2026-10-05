@@ -23,6 +23,11 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    // En Windows, a veces Vite no se entera de que un archivo cambió y sigue
+    // mostrando la versión vieja. Revisar los archivos periódicamente lo evita.
+    watch: { usePolling: true, interval: 300 },
+  },
   test: {
     include: ['src/**/*.test.ts'],
   },
