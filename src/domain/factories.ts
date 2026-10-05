@@ -43,9 +43,12 @@ export function createMatch(input: NewMatchInput): Match {
   };
 }
 
-/** Convierte un código interpretado (o una selección con botones) en un evento. */
-export function eventFromCode(code: ParsedCode): MatchEvent {
-  const base = { id: createId(), timestamp: nowIso(), team: code.team };
+/**
+ * Convierte un código interpretado (o una selección con botones) en un evento.
+ * Con `keep` se conservan el id y la hora de un evento existente (al editarlo).
+ */
+export function eventFromCode(code: ParsedCode, keep?: Pick<MatchEvent, 'id' | 'timestamp'>): MatchEvent {
+  const base = { id: keep?.id ?? createId(), timestamp: keep?.timestamp ?? nowIso(), team: code.team };
   switch (code.kind) {
     case 'point':
       return { ...base, type: 'point' };

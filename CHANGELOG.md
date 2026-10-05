@@ -5,6 +5,9 @@ Las versiones siguen [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+### Agregado
+- **Editar acciones** del historial (botón ✎): equipo, jugador, fundamento y resultado, o los jugadores de un cambio. La acción conserva su lugar y su hora original, y el marcador se recalcula.
+
 ## [0.2.0] — 2026-10-04
 
 Pulido para uso en partidos reales.

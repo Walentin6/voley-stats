@@ -21,7 +21,7 @@ function isTypingTarget(target: EventTarget | null): boolean {
 }
 
 export function LiveMatchScreen({ navigate, matchId }: { navigate: Navigate; matchId: string }) {
-  const { match, state, addEvent, removeEvent, undoLast, saveError, getLatest } = useMatch(matchId);
+  const { match, state, addEvent, removeEvent, replaceEvent, undoLast, saveError, getLatest } = useMatch(matchId);
   const [tab, setTab] = useState<Tab>('entry');
   const codeInputRef = useRef<HTMLInputElement>(null);
   const goHome = () => navigate({ name: 'home' });
@@ -116,7 +116,7 @@ export function LiveMatchScreen({ navigate, matchId }: { navigate: Navigate; mat
         <>
           <CodeInput match={match} disabled={entryDisabled} onRecord={record} inputRef={codeInputRef} />
           <ActionPad match={match} state={state} disabled={entryDisabled} onRecord={record} onUndo={undoLast} />
-          <EventLog match={match} state={state} onDelete={removeEvent} />
+          <EventLog match={match} state={state} onDelete={removeEvent} onReplace={replaceEvent} />
         </>
       ) : (
         <StatsView match={match} state={state} />

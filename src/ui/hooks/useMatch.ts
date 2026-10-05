@@ -38,9 +38,24 @@ export function useMatch(matchId: string) {
     [commit],
   );
 
+  /** Reemplaza un evento por otro, en el mismo lugar del historial. */
+  const replaceEvent = useCallback(
+    (event: MatchEvent) => commit((m) => ({ ...m, events: m.events.map((e) => (e.id === event.id ? event : e)) })),
+    [commit],
+  );
+
   const undoLast = useCallback(() => commit((m) => ({ ...m, events: m.events.slice(0, -1) })), [commit]);
 
   const state = useMemo(() => (match ? computeMatchState(match) : null), [match]);
 
-  return { match, state, addEvent, removeEvent, undoLast, saveError, getLatest: () => matchRef.current };
+  return {
+    match,
+    state,
+    addEvent,
+    removeEvent,
+    replaceEvent,
+    undoLast,
+    saveError,
+    getLatest: () => matchRef.current,
+  };
 }

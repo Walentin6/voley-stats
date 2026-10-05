@@ -646,6 +646,79 @@ button:focus-visible {
 .event-desc {
   min-width: 0;
 }
+.event-buttons {
+  display: flex;
+  gap: 0.1rem;
+}
+.event.editing {
+  outline: 2px solid var(--primary);
+}
+.event-editor {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0 0.25rem;
+  border-top: 1px solid var(--border);
+  font-style: normal;
+}
+.event-editor p {
+  margin: 0;
+}
+.editor-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.editor-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  min-width: 5.5rem;
+}
+.editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+.segmented,
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.chip {
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  cursor: pointer;
+}
+.chip .code {
+  font-size: 0.95rem;
+}
+.chip.selected {
+  border-color: var(--primary);
+  background: var(--surface-2);
+  font-weight: 600;
+}
+.chip.home.selected {
+  border-color: var(--home);
+  background: var(--home-soft);
+}
+.chip.away.selected {
+  border-color: var(--away);
+  background: var(--away-soft);
+}
+.chip.q-0 .code { color: var(--q0); }
+.chip.q-1 .code { color: var(--q1); }
+.chip.q-2 .code { color: var(--q2); }
+.chip.q-3 .code { color: var(--q3); }
+.chip.q-4 .code { color: var(--q4); }
+.chip.q-5 .code { color: var(--q5); }
 .event.event-meta {
   background: var(--surface-2);
   font-style: italic;

@@ -35,7 +35,7 @@ export function withCodes(match: Match, codes: string[]): Match {
 
 /** Agrega eventos que no tienen código de teclado (por ejemplo, cambio de saque). */
 export function withEvents(match: Match, inputs: ParsedCode[]): Match {
-  return { ...match, events: [...match.events, ...inputs.map(eventFromCode)] };
+  return { ...match, events: [...match.events, ...inputs.map((c) => eventFromCode(c))] };
 }
 
 /** Repite un código n veces. */

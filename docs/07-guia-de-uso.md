@@ -69,7 +69,11 @@ Lista completa en [04 — Reglas de juego](04-reglas-de-juego.md).
 
 ### Corregir errores
 - **↶ Deshacer última** (o **Ctrl + Z**): borra la última acción.
-- En el **Historial**, la ✕ de cada fila borra esa acción. El marcador se recalcula solo.
+- En el **Historial**, el ✎ de cada fila abre el **editor**: cambia el equipo, el jugador,
+  el fundamento o el resultado (en un cambio, quién sale y quién entra) y pulsa
+  **Guardar cambios** (o Enter; Esc cancela). La acción conserva su lugar en el historial
+  y el marcador se recalcula solo.
+- La ✕ de cada fila borra esa acción.
 - **⇄ Cambiar saque**: si el saque quedó en el equipo equivocado, pásalo al otro.
 
 ### Atajos de teclado
