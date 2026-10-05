@@ -73,6 +73,13 @@ export interface EventInfo {
   afterEnd: boolean;
   /** Posibles errores de carga detectados en este evento. */
   warnings: RallyWarning[];
+  /**
+   * Solo en saques: true si el rival falló la recepción justo después (R=).
+   * Como en Data Volley, ese saque cuenta como ace en las estadísticas.
+   */
+  impliedAce?: true;
+  /** Solo en recepciones con error: id del saque que se convierte en ace por esta recepción. */
+  aceOf?: string;
 }
 
 export interface MatchState {
@@ -143,6 +150,8 @@ export function computeMatchState(match: Match): MatchState {
   let lastPoint: { event: ActionEvent; info: EventInfo } | null = null;
   // true si hubo acciones desde el último punto (el rally está en juego).
   let rallyOpen = false;
+  // Saque de este rally, si fue la última acción (para el ace por recepción fallada).
+  let lastServe: { event: ActionEvent; info: EventInfo } | null = null;
 
   const snapshot = (): Courts => {
     const one = (side: TeamSide): CourtSnapshot | null => {
@@ -212,6 +221,7 @@ export function computeMatchState(match: Match): MatchState {
       serving = event.team;
       rallyOpen = false;
       lastPoint = null;
+      lastServe = null;
       info[event.id] = { ...base, pointTo: null, scoreAfter: score(), warnings };
       continue;
     }
@@ -245,6 +255,23 @@ export function computeMatchState(match: Match): MatchState {
 
     const eventInfo: EventInfo = { ...base, pointTo, scoreAfter: score(), warnings };
     info[event.id] = eventInfo;
+
+    // Ace por recepción fallada: saque (no ace, no error) seguido de un R= del rival.
+    if (
+      event.type === 'action' &&
+      event.skill === 'R' &&
+      event.quality === '=' &&
+      lastServe &&
+      lastServe.event.team !== event.team
+    ) {
+      lastServe.info.impliedAce = true;
+      eventInfo.aceOf = lastServe.event.id;
+    }
+    // Recordar el saque del rally, si fue la última acción (los tiempos y cambios no cuentan).
+    lastServe =
+      event.type === 'action' && event.skill === 'S' && event.quality !== '#' && event.quality !== '='
+        ? { event, info: eventInfo }
+        : null;
     lastPoint = pointTo && event.type === 'action' ? { event, info: eventInfo } : null;
 
     // ¿Terminó el set?

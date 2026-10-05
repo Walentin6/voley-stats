@@ -5,6 +5,15 @@ Las versiones siguen [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [0.3.1] — 2026-10-05
+
+### Agregado
+- Columna **Pos%** de saque: (aces + `S+` + `S/`) / total.
+- **Ace por recepción fallada** (como en Data Volley): un saque seguido de un `R=` del rival cuenta como ace en las estadísticas y su punto es del sacador, no "error del rival". Se indica en el historial.
+
+### Corregido
+- Un ace (`S#`) justo después de un rally que terminó en error de recepción (`R=`) se tomaba como "el mismo punto" y no sumaba al marcador. Un saque ya no puede ser espejo de la acción anterior.
+
 ## [0.3.0] — 2026-10-04
 
 Rotaciones.

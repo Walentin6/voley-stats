@@ -27,3 +27,5 @@ rápidos. Para un producto general también queremos atraer a usuarios sin exper
 - ⚠️ La regla de espejos tiene un caso ambiguo poco probable: si se omite el saque y se
   registra `R=` del rival justo después de un ace en el rally anterior, se tomaría como
   el mismo punto. Documentado en [04 — Reglas de juego](../04-reglas-de-juego.md).
+- (v0.3.1) El caso inverso sí se resolvió: un saque nunca es espejo de la acción anterior,
+  porque siempre empieza un rally nuevo (`a2R=` y después `5S#` son dos puntos).

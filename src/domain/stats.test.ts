@@ -6,6 +6,7 @@ import {
   breakPointPct,
   receptionPositive,
   serveEfficiency,
+  servePositive,
   sideOutPct,
 } from './metrics';
 import { computeTeamStats } from './stats';
@@ -46,6 +47,60 @@ describe('computeTeamStats', () => {
     const state = computeMatchState(m);
     expect(computeTeamStats(m, state, 'home', 0).totals.skills.A.total).toBe(25);
     expect(computeTeamStats(m, state, 'home', 1).totals.skills.A.total).toBe(2);
+  });
+});
+
+describe('saque', () => {
+  const serveOf = (codes: string[]) => {
+    const m = withCodes(makeMatch({ firstServe: 'home' }), codes);
+    const state = computeMatchState(m);
+    return { m, state, home: computeTeamStats(m, state, 'home'), away: computeTeamStats(m, state, 'away') };
+  };
+
+  it('un ace solo da 100% de eficacia', () => {
+    const { home } = serveOf(['5S#']);
+    expect(serveEfficiency(home.totals.skills.S)).toBe(1);
+  });
+
+  it('un saque que entra (sin ace ni error) es neutro: 0%', () => {
+    const { home } = serveOf(['5S+']);
+    expect(serveEfficiency(home.totals.skills.S)).toBe(0);
+  });
+
+  it('saque seguido de error de recepción del rival = ace (como en Data Volley)', () => {
+    const { m, state, home } = serveOf(['5S+', 'a2R=']);
+    const p5 = home.players.find((p) => p.playerNumber === 5)!;
+    expect(p5.skills.S.counts['#']).toBe(1);
+    expect(p5.skills.S.counts['+']).toBe(0);
+    expect(p5.points).toBe(1);
+    expect(serveEfficiency(p5.skills.S)).toBe(1);
+    expect(home.pointsFromOpponent).toBe(0); // es punto de saque, no error del rival
+    expect(home.pointsWon).toBe(1);
+    expect(state.sets[0]).toMatchObject({ home: 1, away: 0 });
+    expect(state.info[m.events[0]!.id]!.impliedAce).toBe(true);
+  });
+
+  it('el ace por recepción también vale si hay un tiempo muerto en medio', () => {
+    const { home } = serveOf(['5S!', 'aT', 'a2R=']);
+    expect(home.totals.skills.S.counts['#']).toBe(1);
+  });
+
+  it('no es ace si la recepción no fue error', () => {
+    const { home } = serveOf(['5S+', 'a2R-']);
+    expect(home.totals.skills.S.counts['#']).toBe(0);
+  });
+
+  it('S# + R= sigue contando un solo ace y un solo punto', () => {
+    const { home, state } = serveOf(['5S#', 'a2R=']);
+    expect(home.totals.skills.S.counts['#']).toBe(1);
+    expect(home.totals.points).toBe(1);
+    expect(state.sets[0]).toMatchObject({ home: 1 });
+  });
+
+  it('saque positivo: aces, buenos y "rival devuelve"', () => {
+    const { home } = serveOf(['5S#', '5S+', '5S/', '5S!', '5S-', '5S=']);
+    // 5S# punto local; los siguientes del mismo jugador: no importa quién saca para esta cuenta
+    expect(servePositive(home.totals.skills.S)).toBe(0.5);
   });
 });
 

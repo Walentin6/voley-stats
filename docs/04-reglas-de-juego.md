@@ -65,6 +65,24 @@ Condiciones: las dos acciones son de **equipos distintos**, forman uno de estos 
 aparece como *"(mismo punto, no suma)"*. Las dos cuentan en las estadísticas de su
 fundamento, pero el punto lo tiene solo la primera.
 
+**Excepción:** un saque nunca es espejo de la acción anterior, porque un saque siempre
+empieza un rally nuevo. Así, `a2R=` (rally que terminó en error de recepción) seguido de
+`5S#` (ace en el rally siguiente) son **dos puntos**.
+
+## Ace por recepción fallada
+
+Como en Data Volley, si después de un saque (que no sea ace ni error) el rival **falla la
+recepción** (`R=`), ese saque **cuenta como ace** en las estadísticas:
+
+| Se cargó | El marcador | Las estadísticas |
+|---|---|---|
+| `5S+ a2R=` | Punto para el que saca (por el `R=`) | El #5 suma 1 ace y 1 punto; el `R=` es "punto de saque", no "error del rival" |
+
+- No se cambia lo guardado: el saque sigue guardado como `S+`. Es una regla de cálculo, así
+  que si después se edita o borra el `R=`, el ace desaparece solo.
+- Vale aunque haya un tiempo muerto o un cambio en medio, pero no si hubo otra acción.
+- En el historial, el saque aparece con *"(cuenta como ace: el rival falló la recepción)"*.
+
 ## Sets y partido
 
 - Un set se gana al llegar a `pointsPerSet` (25) con **al menos 2 puntos de diferencia**

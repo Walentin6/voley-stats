@@ -10,10 +10,11 @@ Cuando no hay acciones de un fundamento, el porcentaje se muestra como `–`.
 
 | Grupo | Columna | Cálculo |
 |---|---|---|
-| — | **Pts** | Puntos propios = `S#` + `A#` + `B#` (sin contar espejos) |
+| — | **Pts** | Puntos propios = aces + `A#` + `B#` (sin contar espejos) |
 | Saque | Tot | Total de saques |
-| | Ace | `S#` |
+| | Ace | `S#`, más los saques seguidos de un `R=` del rival (ver abajo) |
 | | Err | `S=` |
+| | **Pos%** | (Ace + `S+` + `S/`) / Tot — saques que complicaron la recepción |
 | | **Ef%** | (Ace − Err) / Tot |
 | Recepción | Tot | Total de recepciones |
 | | Err | `R=` |
@@ -29,6 +30,28 @@ Cuando no hay acciones de un fundamento, el porcentaje se muestra como `–`.
 | Defensa | Tot / Err | Total de defensas / `D=` |
 | Free ball | Tot / Err | Total de free balls recibidos / `F=` |
 | Armado | Tot / Err | Total de armados / `E=` |
+
+## Cómo leer las estadísticas de saque
+
+Cada saque se evalúa según lo difícil que se lo puso al rival:
+
+| Código | Significado | Para el que saca |
+|---|---|---|
+| `S#` | Ace | ✅ Punto directo |
+| `S/` | El rival devuelve la pelota | ✅ Muy bueno |
+| `S+` | Bueno: el rival recibe mal | ✅ Positivo |
+| `S!` | Regular: el rival arma con opciones limitadas | ➖ Neutro |
+| `S-` | Malo: el rival recibe perfecto | ❌ Negativo |
+| `S=` | Error | ❌ Punto para el rival |
+
+- **Ef%** solo suma los aces y resta los errores. Un saque que entra sin ser ace es
+  **neutro**: con un solo `S+`, la Ef% da **0%** (no sumó ni restó, no es un error).
+  Un valor negativo (por ejemplo −20%) significa más errores que aces.
+- **Pos%** mide cuántos saques complicaron al rival, aunque no fueran ace.
+
+**Ace por recepción fallada:** si después de un saque el rival falla la recepción (`R=`),
+el saque cuenta como **ace** (como en Data Volley), aunque se haya cargado como `S+` o `S!`.
+Ver [04 — Reglas de juego](04-reglas-de-juego.md).
 
 ## Resumen del equipo
 

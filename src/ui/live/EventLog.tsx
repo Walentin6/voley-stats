@@ -50,6 +50,8 @@ export function EventLog({ match, state, onDelete, onReplace }: Props) {
               <span className="event-desc">
                 {describeEvent(match, ev)}
                 {info?.mirrorOf && <em className="muted"> (mismo punto, no suma)</em>}
+                {info?.impliedAce && <em className="muted"> (cuenta como ace: el rival falló la recepción)</em>}
+                {info?.aceOf && <em className="muted"> (punto de saque)</em>}
                 {info?.afterEnd && <em className="muted"> (después del final)</em>}
                 {info?.warnings.map((w) => (
                   <span key={w} className="event-warning small warn">

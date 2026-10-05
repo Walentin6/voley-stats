@@ -56,6 +56,7 @@ export function pointOutcome(skill: Skill, quality: Quality): 'self' | 'opponent
  * Pares "espejo": dos acciones de equipos distintos que describen EL MISMO
  * punto (por ejemplo, un ace S# y la recepción fallada R= del rival).
  * Si se registran las dos seguidas, el punto se cuenta una sola vez.
+ * `a` es la acción anterior y `b` la nueva.
  */
 const MIRROR_PAIRS: ReadonlyArray<readonly [string, string]> = [
   ['S#', 'R='], // ace ↔ error de recepción
@@ -66,6 +67,9 @@ const MIRROR_PAIRS: ReadonlyArray<readonly [string, string]> = [
 
 export function isMirrorPair(a: ActionEvent, b: ActionEvent): boolean {
   if (a.team === b.team) return false;
+  // Un saque siempre empieza un rally nuevo: nunca repite el punto anterior.
+  // (Ej.: "a2R=" cierra un rally y "5S#" es un ace del rally siguiente.)
+  if (b.skill === 'S') return false;
   const ca = a.skill + a.quality;
   const cb = b.skill + b.quality;
   return MIRROR_PAIRS.some(([x, y]) => (ca === x && cb === y) || (ca === y && cb === x));

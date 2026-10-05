@@ -14,6 +14,14 @@ export function serveEfficiency(s: SkillStats): number | null {
   return ratio(s.counts['#'] - s.counts['='], s.total);
 }
 
+/**
+ * Saque: positivo = (aces + buenos + rival devuelve) / total.
+ * Mide los saques que complicaron la recepción del rival, aunque no fueran ace.
+ */
+export function servePositive(s: SkillStats): number | null {
+  return ratio(s.counts['#'] + s.counts['+'] + s.counts['/'], s.total);
+}
+
 /** Recepción: positiva = (perfectas + buenas) / total. */
 export function receptionPositive(s: SkillStats): number | null {
   return ratio(s.counts['#'] + s.counts['+'], s.total);

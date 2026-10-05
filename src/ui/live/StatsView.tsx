@@ -10,6 +10,7 @@ import {
   receptionPerfect,
   receptionPositive,
   serveEfficiency,
+  servePositive,
 } from '../../domain/metrics';
 import { computeTeamStats, type RotationStats, type SetFilter, type StatLine } from '../../domain/stats';
 import type { Match, TeamSide } from '../../domain/types';
@@ -27,6 +28,7 @@ function Cells({ line }: { line: StatLine }) {
       <td className="grp">{S.total}</td>
       <td>{S.counts['#']}</td>
       <td>{S.counts['=']}</td>
+      <td>{formatPct(servePositive(S))}</td>
       <td>{formatPct(serveEfficiency(S))}</td>
       <td className="grp">{R.total}</td>
       <td>{R.counts['=']}</td>
@@ -134,7 +136,7 @@ function TeamTable({ match, state, side, filter }: Props & { side: TeamSide; fil
             <tr>
               <th rowSpan={2}>Jugador</th>
               <th rowSpan={2}>Pts</th>
-              <th colSpan={4} className="grp">Saque</th>
+              <th colSpan={5} className="grp">Saque</th>
               <th colSpan={4} className="grp">Recepción</th>
               <th colSpan={6} className="grp">Ataque</th>
               <th className="grp">Bloq.</th>
@@ -146,7 +148,8 @@ function TeamTable({ match, state, side, filter }: Props & { side: TeamSide; fil
               <th className="grp">Tot</th>
               <th>Ace</th>
               <th>Err</th>
-              <th>Ef%</th>
+              <th title="Saques positivos: (# + + + /) / total">Pos%</th>
+              <th title="Eficacia: (aces − errores) / total">Ef%</th>
               <th className="grp">Tot</th>
               <th>Err</th>
               <th>Pos%</th>
@@ -210,9 +213,9 @@ export function StatsView({ match, state }: Props) {
       <TeamTable match={match} state={state} side="home" filter={filter} />
       <TeamTable match={match} state={state} side="away" filter={filter} />
       <p className="small muted">
-        Side-out = % de rallies ganados recibiendo · Break-point = % de rallies ganados sacando · Ef% saque =
-        (aces − errores) / total · Pos% recepción = (# + +) / total · Ef% ataque = (puntos − errores − bloqueados) /
-        total.
+        Side-out = % de rallies ganados recibiendo · Break-point = % de rallies ganados sacando · Pos% saque = (# +
+        + + /) / total · Ef% saque = (aces − errores) / total · Pos% recepción = (# + +) / total · Ef% ataque =
+        (puntos − errores − bloqueados) / total. Un saque seguido de un error de recepción del rival cuenta como ace.
       </p>
     </div>
   );

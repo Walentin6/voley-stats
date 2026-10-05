@@ -124,7 +124,9 @@ export function computeTeamStats(
 
     if (info.pointTo === side) {
       pointsWon += 1;
-      if (event.type === 'point' || event.team === otherSide(side)) pointsFromOpponent += 1;
+      // Un R= que convierte el saque en ace es punto de saque, no "error del rival".
+      const fromOpponent = event.type === 'point' || (event.team === otherSide(side) && !info.aceOf);
+      if (fromOpponent) pointsFromOpponent += 1;
     }
 
     // Cada evento que da un punto cierra un rally.
@@ -148,12 +150,14 @@ export function computeTeamStats(
       byNumber.set(event.playerNumber, player);
     }
 
+    // Saque seguido de un error de recepción del rival: cuenta como ace (como en Data Volley).
+    const quality = info.impliedAce ? '#' : event.quality;
     for (const line of [player, totals]) {
       const s = line.skills[event.skill];
       s.total += 1;
-      s.counts[event.quality] += 1;
+      s.counts[quality] += 1;
       // Un espejo no suma: el punto ya lo tiene la otra acción.
-      if (info.pointTo === side && !info.mirrorOf) line.points += 1;
+      if ((info.pointTo === side && !info.mirrorOf) || info.impliedAce) line.points += 1;
     }
   }
 

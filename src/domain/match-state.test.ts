@@ -37,6 +37,13 @@ describe('computeMatchState', () => {
     expect(s.info[mirror!.id]!.mirrorOf).toBe(m.events[0]!.id);
   });
 
+  it('un ace después de un rally que terminó en error de recepción suma (no es espejo)', () => {
+    // Rally 1: solo se cargó la recepción fallada del visitante → punto local.
+    // Rally 2: el local hace un ace → otro punto.
+    const m = withCodes(makeMatch({ firstServe: 'home' }), ['a2R=', '5S#']);
+    expect(computeMatchState(m).sets[0]).toMatchObject({ home: 2, away: 0 });
+  });
+
   it('dos aces seguidos del mismo equipo son dos puntos', () => {
     const m = withCodes(makeMatch(), ['1S#', '1S#']);
     expect(computeMatchState(m).sets[0]).toMatchObject({ home: 2, away: 0 });
