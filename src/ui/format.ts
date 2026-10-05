@@ -30,6 +30,8 @@ export function describeCode(match: Match, code: ParsedCode): string {
       const quality = QUALITY_LABELS[code.skill][code.quality];
       return `${team} · ${playerLabel(match, code.team, code.playerNumber)} · ${skill}: ${quality}`;
     }
+    case 'lineup':
+      return `Formación ${team}: ${code.positions.map((n, i) => `P${i + 1} #${n}`).join(' · ')}`;
   }
 }
 
@@ -40,7 +42,11 @@ export function eventToCode(event: MatchEvent): ParsedCode {
       return { kind: 'action', team: event.team, playerNumber: event.playerNumber, skill: event.skill, quality: event.quality };
     case 'substitution':
       return { kind: 'substitution', team: event.team, playerOut: event.playerOut, playerIn: event.playerIn };
-    default:
+    case 'lineup':
+      return { kind: 'lineup', team: event.team, positions: [...event.positions] };
+    case 'point':
+    case 'timeout':
+    case 'serve':
       return { kind: event.type, team: event.team };
   }
 }
@@ -63,6 +69,8 @@ export function eventCode(event: MatchEvent): string {
       return `${prefix}c${event.playerOut}:${event.playerIn}`;
     case 'action':
       return `${prefix}${event.playerNumber}${event.skill}${event.quality}`;
+    case 'lineup':
+      return `${prefix}formación`;
   }
 }
 
@@ -72,6 +80,11 @@ export const WARNING_LABELS: Record<RallyWarning, string> = {
   'reception-by-server': 'Recibe el mismo equipo que saca',
   'timeout-limit': `Más de ${TIMEOUTS_PER_SET} tiempos muertos en el set`,
   'substitution-limit': `Más de ${SUBSTITUTIONS_PER_SET} cambios en el set`,
+  'wrong-server': 'Saca un jugador que no está en la posición 1',
+  'player-not-on-court': 'El jugador no está en cancha según la formación',
+  'sub-not-on-court': 'El jugador que sale no estaba en cancha',
+  'sub-already-on-court': 'El jugador que entra ya estaba en cancha',
+  'libero-substitution': 'Las entradas del líbero no se registran como cambio (no cuenta)',
 };
 
 export function formatDate(isoDate: string): string {

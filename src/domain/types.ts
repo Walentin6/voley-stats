@@ -116,7 +116,26 @@ export interface ServeChangeEvent {
   timestamp: string;
 }
 
-export type MatchEvent = ActionEvent | PointEvent | TimeoutEvent | SubstitutionEvent | ServeChangeEvent;
+/**
+ * Formación en cancha de un equipo (normalmente al empezar cada set).
+ * Ver src/domain/rotation.ts.
+ */
+export interface LineupEvent {
+  id: string;
+  type: 'lineup';
+  team: TeamSide;
+  /** 6 números de camiseta: índice 0 = posición 1 (saque), ..., 5 = posición 6. */
+  positions: number[];
+  timestamp: string;
+}
+
+export type MatchEvent =
+  | ActionEvent
+  | PointEvent
+  | TimeoutEvent
+  | SubstitutionEvent
+  | ServeChangeEvent
+  | LineupEvent;
 
 export interface Match {
   id: string;

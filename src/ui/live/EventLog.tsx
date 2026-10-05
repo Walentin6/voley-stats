@@ -58,14 +58,17 @@ export function EventLog({ match, state, onDelete, onReplace }: Props) {
                 ))}
               </span>
               <span className="event-buttons">
-                <button
-                  className="btn ghost small"
-                  onClick={() => setEditingId(editing ? null : ev.id)}
-                  aria-label="Editar acción"
-                  title="Editar"
-                >
-                  ✎
-                </button>
+                {/* Las formaciones se corrigen con el botón "Formación" de cada equipo */}
+                {ev.type !== 'lineup' && (
+                  <button
+                    className="btn ghost small"
+                    onClick={() => setEditingId(editing ? null : ev.id)}
+                    aria-label="Editar acción"
+                    title="Editar"
+                  >
+                    ✎
+                  </button>
+                )}
                 <button
                   className="btn ghost danger small"
                   onClick={() => {

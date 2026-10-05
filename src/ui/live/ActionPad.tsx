@@ -2,12 +2,14 @@
  * Carga de acciones con botones (pensado para pantallas táctiles).
  * Flujo de una acción: 1) jugador → 2) fundamento → 3) resultado.
  * Flujo de un cambio: "Cambio" → jugador que sale → jugador que entra.
+ * Con formación cargada, se dibuja la cancha (P1–P6) y el banco aparte, y el
+ * saque se puede registrar sin elegir jugador: "Saque" → resultado.
  */
 import { useState } from 'react';
 import type { ParsedCode } from '../../domain/code-parser';
 import { SUBSTITUTIONS_PER_SET, TIMEOUTS_PER_SET, type MatchState } from '../../domain/match-state';
 import { QUALITIES, QUALITY_LABELS, SKILL_LABELS, SKILLS } from '../../domain/skills';
-import type { Match, Quality, Skill, TeamSide } from '../../domain/types';
+import type { Match, Player, Quality, Skill, TeamSide } from '../../domain/types';
 import { otherSide } from '../../domain/types';
 import { playerLabel } from '../format';
 
@@ -17,7 +19,11 @@ interface Props {
   disabled: boolean;
   onRecord: (code: ParsedCode) => void;
   onUndo: () => void;
+  onEditLineup: (team: TeamSide) => void;
 }
+
+/** Orden de las posiciones en la cuadrícula: adelante P4 P3 P2, atrás P5 P6 P1. */
+const COURT_LAYOUT = [3, 2, 1, 4, 5, 0];
 
 interface Selection {
   team: TeamSide;
@@ -30,7 +36,7 @@ interface SubDraft {
   playerOut: number | null;
 }
 
-export function ActionPad({ match, state, disabled, onRecord, onUndo }: Props) {
+export function ActionPad({ match, state, disabled, onRecord, onUndo, onEditLineup }: Props) {
   const [selected, setSelected] = useState<Selection | null>(null);
   const [skill, setSkill] = useState<Skill | null>(null);
   const [sub, setSub] = useState<SubDraft | null>(null);
@@ -47,7 +53,16 @@ export function ActionPad({ match, state, disabled, onRecord, onUndo }: Props) {
     reset();
   }
 
+  // Con formación cargada, el saque se puede registrar sin elegir jugador: lo hace el de P1.
+  // quickServer = jugador que saca si se eligió "Saque" sin elegir jugador.
+  const quickServer = !selected && skill === 'S' ? state.courts[state.serving]?.positions[0] : undefined;
+  const quickServe = quickServer !== undefined;
+
   function pickQuality(quality: Quality) {
+    if (quickServer !== undefined) {
+      record({ kind: 'action', team: state.serving, playerNumber: quickServer, skill: 'S', quality });
+      return;
+    }
     if (!selected || !skill) return;
     record({ kind: 'action', team: selected.team, playerNumber: selected.playerNumber, skill, quality });
   }
@@ -75,31 +90,51 @@ export function ActionPad({ match, state, disabled, onRecord, onUndo }: Props) {
     const timeouts = currentSet.timeouts[side];
     const subs = currentSet.substitutions[side];
     const subActive = sub?.team === side;
+    const court = state.courts[side];
+
+    const playerButton = (p: Player, positionLabel?: string) => {
+      const isSel =
+        (selected?.team === side && selected.playerNumber === p.number) ||
+        (subActive && sub?.playerOut === p.number);
+      return (
+        <button
+          key={p.id}
+          className={`player-btn ${isSel ? 'selected' : ''} ${p.position === 'L' ? 'libero' : ''}`}
+          disabled={disabled || (sub !== null && !subActive)}
+          onClick={() => pickPlayer(side, p.number)}
+          title={p.name}
+        >
+          {positionLabel && <span className="player-pos">{positionLabel}</span>}
+          <span className="player-num">{p.number}</span>
+          <span className="player-name">{p.name || ' '}</span>
+        </button>
+      );
+    };
+
+    const byNumber = (n: number) =>
+      match[side].players.find((p) => p.number === n) ?? { id: `x${n}`, number: n, name: '' };
+
     return (
       <div className={`pad-team ${side}`}>
         <div className="pad-team-name">
           {match[side].name}
           {state.serving === side && !state.finished && <span className="tag">saca</span>}
+          {court && <span className="tag rotation" title="Rotación">{court.label}</span>}
         </div>
-        <div className="player-grid">
-          {match[side].players.map((p) => {
-            const isSel =
-              (selected?.team === side && selected.playerNumber === p.number) ||
-              (subActive && sub?.playerOut === p.number);
-            return (
-              <button
-                key={p.id}
-                className={`player-btn ${isSel ? 'selected' : ''} ${p.position === 'L' ? 'libero' : ''}`}
-                disabled={disabled || (sub !== null && !subActive)}
-                onClick={() => pickPlayer(side, p.number)}
-                title={p.name}
-              >
-                <span className="player-num">{p.number}</span>
-                <span className="player-name">{p.name || ' '}</span>
-              </button>
-            );
-          })}
-        </div>
+        {court ? (
+          <>
+            {/* Cancha vista desde atrás: la red arriba */}
+            <div className="court-grid">
+              {COURT_LAYOUT.map((idx) => playerButton(byNumber(court.positions[idx]!), `P${idx + 1}`))}
+            </div>
+            <div className="bench-label small muted">Banco</div>
+            <div className="player-grid bench">
+              {match[side].players.filter((p) => !court.positions.includes(p.number)).map((p) => playerButton(p))}
+            </div>
+          </>
+        ) : (
+          <div className="player-grid">{match[side].players.map((p) => playerButton(p))}</div>
+        )}
         <div className="team-actions">
           <button className="btn point-btn" disabled={disabled || sub !== null} onClick={() => record({ kind: 'point', team: side })}>
             + Punto
@@ -120,6 +155,14 @@ export function ActionPad({ match, state, disabled, onRecord, onUndo }: Props) {
           >
             Cambio {subs}/{SUBSTITUTIONS_PER_SET}
           </button>
+          <button
+            className="btn"
+            disabled={state.finished || sub !== null}
+            onClick={() => onEditLineup(side)}
+            title="Cargar o corregir la formación en cancha"
+          >
+            Formación
+          </button>
         </div>
       </div>
     );
@@ -135,6 +178,8 @@ export function ActionPad({ match, state, disabled, onRecord, onUndo }: Props) {
     hint = `${match[selected.team].name} · ${playerLabel(match, selected.team, selected.playerNumber)}${
       skill ? ` · ${SKILL_LABELS[skill]} · elige el resultado` : ' · elige el fundamento'
     }`;
+  } else if (quickServer !== undefined) {
+    hint = `Saque de ${match[state.serving].name} · ${playerLabel(match, state.serving, quickServer)} (P1) · elige el resultado`;
   } else {
     hint = skill ? `${SKILL_LABELS[skill]} · elige el jugador` : '1) Jugador  →  2) Fundamento  →  3) Resultado';
   }
@@ -167,7 +212,7 @@ export function ActionPad({ match, state, disabled, onRecord, onUndo }: Props) {
           <button
             key={q}
             className={`quality-btn q-${QUALITIES.indexOf(q)}`}
-            disabled={disabled || !selected || !skill}
+            disabled={disabled || !((selected && skill) || quickServe)}
             onClick={() => pickQuality(q)}
           >
             <span className="code">{q}</span>

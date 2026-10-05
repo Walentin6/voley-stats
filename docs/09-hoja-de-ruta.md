@@ -19,14 +19,19 @@ Cada etapa produce una versión usable. El orden puede cambiar según lo que pid
 - [x] Tiempos muertos y cambios de jugadores (registro simple).
 - [x] Estadísticas de side-out y break-point.
 - [ ] Probar en un partido real y ajustar la interfaz según la experiencia. *(pendiente del usuario)*
-- [ ] Publicar la app en internet para usarla en celular/tablet.
+- [ ] Publicar la app en internet para usarla en celular/tablet. *(por ahora no: decisión del usuario)*
 
-## Etapa 3 — Rotaciones (v0.3)
-- [ ] Formación inicial de cada set (6 jugadores + líbero).
-- [ ] Rotación automática al recuperar el saque.
-- [ ] Sustituciones y líbero.
-- [ ] Al seleccionar acciones, proponer primero a los jugadores en cancha.
-- [ ] Estadísticas por rotación (P1–P6).
+## ✅ Etapa 3 — Rotaciones (v0.3) — *terminada*
+- [x] Editar acciones del historial.
+- [x] Formación de cada set (opcional, propone la del set anterior).
+- [x] Rotación automática al recuperar el saque.
+- [x] Sacador automático (jugador en P1): `S+` y botón *Saque* sin elegir jugador.
+- [x] Cambios que respetan la posición; avisos de cambios imposibles.
+- [x] Líbero: sus acciones se cargan normal; sus entradas no se registran (ADR-006).
+- [x] Cancha dibujada en los botones (titulares por posición, banco aparte).
+- [x] Estadísticas por rotación (P1–P6 / R1–R6).
+- [ ] Registrar entradas y salidas del líbero (si hace falta en el futuro).
+- [ ] Recepción y ataque por rotación.
 
 ## Etapa 4 — Cancha y zonas (v0.4)
 - [ ] Marcar zona de origen y destino haciendo clic en un dibujo de la cancha.

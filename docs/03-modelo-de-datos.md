@@ -18,7 +18,8 @@ Match
               ├─ PointEvent         (punto asignado a mano)
               ├─ TimeoutEvent       (tiempo muerto)
               ├─ SubstitutionEvent  (cambio de jugador)
-              └─ ServeChangeEvent   (indicar a mano quién saca)
+              ├─ ServeChangeEvent   (indicar a mano quién saca)
+              └─ LineupEvent        (formación en cancha)
 ```
 
 Todos los eventos tienen `id`, `type`, `team` y `timestamp`.
@@ -91,10 +92,20 @@ Tiempo muerto pedido por `team`. `type: 'timeout'`. No cambia marcador ni saque.
 `type: 'serve'`. A partir de este evento, saca `team`. Se usa para elegir el saque del
 set decisivo y para corregir errores con *⇄ Cambiar saque*.
 
+### LineupEvent
+| Campo | Ejemplo | Descripción |
+|---|---|---|
+| `type` | `'lineup'` | Tipo de evento |
+| `team` | `'home'` | Equipo |
+| `positions` | `[1, 4, 9, 12, 7, 11]` | 6 números: índice 0 = P1 (saca), 1 = P2, ..., 5 = P6 |
+
+Se registra al empezar el set (o al corregir la formación). Desde ese momento la app sigue
+la rotación de ese equipo hasta el final del set.
+
 ## Lo que NO se guarda
 
-El marcador, los sets ganados, quién saca, los tiempos y cambios usados en cada set, los
-avisos de carga y las estadísticas **no se guardan**: se calculan a partir de `events`
+El marcador, los sets ganados, quién saca, la rotación actual de cada equipo, los tiempos y
+cambios usados en cada set, los avisos de carga y las estadísticas **no se guardan**: se calculan a partir de `events`
 cada vez. Así nunca pueden quedar desincronizados.
 Ver [ADR-002](adr/ADR-002-partido-como-eventos.md).
 

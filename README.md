@@ -4,7 +4,7 @@ Aplicación de **scouting y estadísticas de vóley en vivo**, inspirada en Data
 Funciona en el navegador (computadora, tablet o celular), **sin internet**, y guarda
 cada acción en el momento.
 
-> Estado: **v0.2.0 — pulido para uso real**. Ver [CHANGELOG](CHANGELOG.md) y la
+> Estado: **v0.3.0 — rotaciones**. Ver [CHANGELOG](CHANGELOG.md) y la
 > [hoja de ruta](docs/09-hoja-de-ruta.md).
 
 ## Qué hace hoy
@@ -17,9 +17,11 @@ cada acción en el momento.
 - Los 7 fundamentos de Data Volley: saque, recepción, armado, ataque, bloqueo, defensa y free ball.
 - Marcador, sets, saque y final del partido calculados automáticamente (con elección del
   saque en el set decisivo).
+- Formación por set y **rotación automática**: la cancha dibujada en los botones, sacador
+  automático (`S+`) y estadísticas por rotación (P1–P6).
 - Tiempos muertos y cambios, con contador por set.
 - Avisos de posibles errores de carga.
-- Deshacer la última acción (Ctrl+Z) o borrar cualquiera del historial.
+- Deshacer la última acción (Ctrl+Z), o editar o borrar cualquiera del historial.
 - Estadísticas por jugador y por equipo, de todo el partido o por set, con side-out y break-point.
 - Exportar e importar partidos en JSON como respaldo.
 

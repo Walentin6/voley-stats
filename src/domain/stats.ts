@@ -25,8 +25,19 @@ export interface PlayerStats extends StatLine {
   name: string;
 }
 
+/** Rallies de un equipo en una rotación (P1..P6 o R1..R6). */
+export interface RotationStats {
+  label: string;
+  receiveRallies: number;
+  sideOuts: number;
+  serveRallies: number;
+  breakPoints: number;
+}
+
 export interface TeamStats {
   players: PlayerStats[];
+  /** Solo incluye rallies en los que el equipo tenía formación cargada. */
+  rotations: RotationStats[];
   totals: StatLine;
   /** Puntos totales ganados por el equipo. */
   pointsWon: number;
@@ -51,6 +62,40 @@ function emptyStatLine(): StatLine {
     skills[s] = { total: 0, counts };
   }
   return { points: 0, skills };
+}
+
+/**
+ * Side-out y break-point de un equipo en cada rotación. La rotación de cada
+ * rally es la que tenía el equipo cuando se jugó (antes de rotar por ese punto).
+ */
+export function computeRotationStats(
+  match: Match,
+  state: MatchState,
+  side: TeamSide,
+  setFilter: SetFilter = 'all',
+): RotationStats[] {
+  const byLabel = new Map<string, RotationStats>();
+  for (const event of match.events) {
+    const info = state.info[event.id];
+    if (!info || info.afterEnd || !info.pointTo) continue;
+    if (setFilter !== 'all' && info.setIndex !== setFilter) continue;
+    const court = info.courts[side];
+    if (!court) continue;
+    let row = byLabel.get(court.label);
+    if (!row) {
+      row = { label: court.label, receiveRallies: 0, sideOuts: 0, serveRallies: 0, breakPoints: 0 };
+      byLabel.set(court.label, row);
+    }
+    const won = info.pointTo === side;
+    if (info.servingTeam === side) {
+      row.serveRallies += 1;
+      if (won) row.breakPoints += 1;
+    } else {
+      row.receiveRallies += 1;
+      if (won) row.sideOuts += 1;
+    }
+  }
+  return [...byLabel.values()].sort((a, b) => a.label.localeCompare(b.label));
 }
 
 export function computeTeamStats(
@@ -114,6 +159,7 @@ export function computeTeamStats(
 
   return {
     players: [...byNumber.values()],
+    rotations: computeRotationStats(match, state, side, setFilter),
     totals,
     pointsWon,
     pointsFromOpponent,

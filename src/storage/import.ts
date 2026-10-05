@@ -14,7 +14,7 @@ class InvalidFile extends Error {}
 type Obj = Record<string, unknown>;
 
 const POSITIONS: readonly Position[] = ['S', 'OH', 'MB', 'OP', 'L'];
-const EVENT_TYPES = ['action', 'point', 'timeout', 'substitution', 'serve'] as const;
+const EVENT_TYPES = ['action', 'point', 'timeout', 'substitution', 'serve', 'lineup'] as const;
 
 function fail(message: string): never {
   throw new InvalidFile(message);
@@ -75,6 +75,10 @@ function parseEvent(value: unknown, where: string): MatchEvent {
       return { ...base, type };
     case 'substitution':
       return { ...base, type, playerOut: jersey(o.playerOut, where), playerIn: jersey(o.playerIn, where) };
+    case 'lineup': {
+      if (!Array.isArray(o.positions) || o.positions.length !== 6) fail(`${where}: la formación necesita 6 jugadores`);
+      return { ...base, type, positions: o.positions.map((n) => jersey(n, where)) };
+    }
     case 'action': {
       const skill = o.skill as Skill;
       const quality = o.quality as Quality;

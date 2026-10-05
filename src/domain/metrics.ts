@@ -34,13 +34,13 @@ export function attackEfficiency(s: SkillStats): number | null {
   return ratio(s.counts['#'] - s.counts['='] - s.counts['/'], s.total);
 }
 
-/** Side-out: % de rallies ganados cuando el equipo recibe. */
-export function sideOutPct(stats: TeamStats): number | null {
+/** Side-out: % de rallies ganados cuando el equipo recibe (de un equipo o de una rotación). */
+export function sideOutPct(stats: Pick<TeamStats, 'sideOuts' | 'receiveRallies'>): number | null {
   return ratio(stats.sideOuts, stats.receiveRallies);
 }
 
-/** Break-point: % de rallies ganados cuando el equipo saca. */
-export function breakPointPct(stats: TeamStats): number | null {
+/** Break-point: % de rallies ganados cuando el equipo saca (de un equipo o de una rotación). */
+export function breakPointPct(stats: Pick<TeamStats, 'breakPoints' | 'serveRallies'>): number | null {
   return ratio(stats.breakPoints, stats.serveRallies);
 }
 

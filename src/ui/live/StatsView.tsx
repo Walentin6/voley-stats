@@ -11,7 +11,7 @@ import {
   receptionPositive,
   serveEfficiency,
 } from '../../domain/metrics';
-import { computeTeamStats, type SetFilter, type StatLine } from '../../domain/stats';
+import { computeTeamStats, type RotationStats, type SetFilter, type StatLine } from '../../domain/stats';
 import type { Match, TeamSide } from '../../domain/types';
 
 interface Props {
@@ -45,6 +45,57 @@ function Cells({ line }: { line: StatLine }) {
       <td>{F.counts['=']}</td>
       <td className="grp">{E.total}</td>
       <td>{E.counts['=']}</td>
+    </>
+  );
+}
+
+/** Side-out y break-point en cada rotación (solo rallies con formación cargada). */
+function RotationTable({ rows }: { rows: RotationStats[] }) {
+  return (
+    <>
+      <h4 className="rotation-heading">Por rotación</h4>
+      <div className="table-scroll">
+        <table className="stats-table">
+          <thead>
+            <tr>
+              <th>Rotación</th>
+              <th className="grp">Side-out</th>
+              <th>Ganados / recibiendo</th>
+              <th className="grp">Break-point</th>
+              <th>Ganados / sacando</th>
+              <th className="grp">Saldo</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => {
+              const won = r.sideOuts + r.breakPoints;
+              const lost = r.receiveRallies + r.serveRallies - won;
+              return (
+                <tr key={r.label}>
+                  <td className="player-cell">
+                    <strong>{r.label}</strong>
+                  </td>
+                  <td className="grp strong">{formatPct(sideOutPct(r))}</td>
+                  <td>
+                    {r.sideOuts} / {r.receiveRallies}
+                  </td>
+                  <td className="grp strong">{formatPct(breakPointPct(r))}</td>
+                  <td>
+                    {r.breakPoints} / {r.serveRallies}
+                  </td>
+                  <td className={`grp strong ${won - lost < 0 ? 'error' : ''}`}>
+                    {won - lost > 0 ? `+${won - lost}` : won - lost}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p className="small muted">
+        P1–P6 = posición del armador (R1–R6 si la plantilla no marca a nadie como armador: rotaciones contadas
+        desde la formación). Saldo = puntos ganados − perdidos en esa rotación.
+      </p>
     </>
   );
 }
@@ -133,6 +184,7 @@ function TeamTable({ match, state, side, filter }: Props & { side: TeamSide; fil
           </tfoot>
         </table>
       </div>
+      {stats.rotations.length > 0 && <RotationTable rows={stats.rotations} />}
     </section>
   );
 }

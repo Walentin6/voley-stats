@@ -22,6 +22,27 @@ Los equipos se reutilizan en todos los partidos.
 La pantalla de partido tiene arriba el **marcador** (el punto amarillo indica quién saca)
 y dos pestañas: **Carga** y **Estadísticas**.
 
+### Formación (opcional, recomendada)
+Al empezar cada set aparece **Formación del set N**. Para cada equipo:
+1. Elige el jugador de cada posición (P1 es el que saca; la red está arriba).
+2. Pulsa **Guardar formación**.
+
+A partir del set 2 ya aparece la formación del set anterior: si no cambió, solo pulsa
+Guardar. Si no quieres cargarla, pulsa **Seguir sin formación**.
+
+Con la formación cargada:
+- Los jugadores se muestran **como en la cancha** (adelante P4 P3 P2, atrás P5 P6 P1) y el
+  banco aparte, más chico.
+- La etiqueta junto al nombre del equipo (P1…P6) indica la **rotación** actual.
+- La app **rota sola** cuando el equipo recupera el saque.
+- El **saque** se carga sin elegir jugador: pulsa *Saque* y el resultado, o escribe `S+`.
+- Los cambios ponen al que entra en la posición del que sale.
+
+El botón **Formación** de cada equipo permite cargarla más tarde o corregirla.
+
+**Marca al armador** en la plantilla (posición "Armador") para que las rotaciones se llamen
+como en Data Volley (P1 = armador en posición 1). El líbero no va en la formación.
+
 ### Con botones (táctil)
 1. Pulsa el **jugador** (columna izquierda = local, derecha = visitante).
 2. Pulsa el **fundamento** (Saque, Recepción, Armado, Ataque, Bloqueo, Defensa, Free ball).
@@ -94,6 +115,7 @@ Pestaña **Estadísticas**. Puedes ver todo el partido o un set concreto.
 
 Arriba de cada tabla están los indicadores del equipo: **puntos ganados**, **side-out**
 (% de rallies ganados recibiendo) y **break-point** (% de rallies ganados sacando).
+Si se cargó la formación, abajo aparece la tabla **por rotación**.
 Significado de cada columna: [06 — Estadísticas](06-estadisticas.md).
 
 ## 5. Respaldo

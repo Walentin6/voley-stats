@@ -41,7 +41,8 @@ El código está dividido en tres capas. Cada capa solo puede usar a las de abaj
 |---|---|
 | `types.ts` | Tipos centrales: `Team`, `Player`, `Match`, `MatchEvent`... |
 | `skills.ts` | Fundamentos, calidades, etiquetas, qué acciones dan punto, pares espejo |
-| `match-state.ts` | Reproduce los eventos y calcula marcador, sets, saque, ganador, tiempos/cambios por set y avisos de carga |
+| `match-state.ts` | Reproduce los eventos y calcula marcador, sets, saque, ganador, rotaciones, tiempos/cambios por set y avisos de carga |
+| `rotation.ts` | Formaciones: rotar, nombre de la rotación (P1–P6), validar formación |
 | `code-parser.ts` | Interpreta los códigos de teclado (`7A#`) |
 | `stats.ts` | Cuenta acciones por jugador/equipo |
 | `metrics.ts` | Porcentajes (eficacia, positividad...) |

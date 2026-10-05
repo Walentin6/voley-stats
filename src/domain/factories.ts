@@ -58,6 +58,8 @@ export function eventFromCode(code: ParsedCode, keep?: Pick<MatchEvent, 'id' | '
       return { ...base, type: 'serve' };
     case 'substitution':
       return { ...base, type: 'substitution', playerOut: code.playerOut, playerIn: code.playerIn };
+    case 'lineup':
+      return { ...base, type: 'lineup', positions: [...code.positions] };
     case 'action':
       return {
         ...base,

@@ -5,8 +5,24 @@ Las versiones siguen [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [0.3.0] — 2026-10-04
+
+Rotaciones.
+
 ### Agregado
 - **Editar acciones** del historial (botón ✎): equipo, jugador, fundamento y resultado, o los jugadores de un cambio. La acción conserva su lugar y su hora original, y el marcador se recalcula.
+- **Formación** de cada set (opcional): editor con la cancha dibujada (P1–P6); se propone al empezar cada set con la formación anterior; botón **Formación** para cargarla o corregirla en cualquier momento.
+- **Rotación automática** al recuperar el saque, con la rotación actual (P1–P6 según el armador, o R1–R6) junto al nombre del equipo.
+- **Sacador automático**: con formación, `S+` (o *Saque* → resultado con botones) registra el saque del jugador en P1.
+- **Cancha en los botones**: titulares por posición y banco aparte.
+- Los **cambios** ponen al que entra en la posición del que sale.
+- **Estadísticas por rotación**: side-out, break-point y saldo de cada rotación.
+- Nuevos avisos: sacador fuera de P1, jugador que no está en cancha, cambios imposibles, cambio con el líbero.
+- ADR-006: rotaciones opcionales y líbero sin seguimiento.
+
+### Cambiado
+- La pregunta del saque en el set decisivo ya no desaparece al cargar formaciones, tiempos o cambios: solo al elegir el saque o empezar a jugar.
+- Pruebas automáticas: de 48 a 71.
 
 ## [0.2.0] — 2026-10-04
 

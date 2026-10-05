@@ -509,8 +509,110 @@ button:focus-visible {
 }
 .team-actions {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: 0.35rem;
+}
+.tag.rotation {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+/* Cancha: 3 columnas, adelante P4 P3 P2 y atrás P5 P6 P1 */
+.court-grid {
+  display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 3px double var(--border); /* la red */
+}
+.court-grid .player-btn {
+  padding: 0.5rem 0.2rem;
+}
+.player-pos {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--muted);
+  line-height: 1;
+}
+.bench-label {
+  margin-top: 0.15rem;
+}
+.player-grid.bench .player-btn {
+  padding: 0.2rem;
+}
+.player-grid.bench .player-num {
+  font-size: 1rem;
+}
+/* Editor de formación */
+.lineups {
+  background: var(--surface);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.lineups h3,
+.lineups p {
+  margin: 0;
+}
+.lineup-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: 0.75rem;
+}
+.lineup-editor {
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--home);
+  border-radius: var(--radius);
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.lineup-editor.away {
+  border-top-color: var(--away);
+}
+.lineup-editor p {
+  margin: 0;
+}
+.lineup-title {
+  font-weight: 600;
+}
+.lineup-net {
+  text-align: center;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  border-bottom: 3px double var(--border);
+}
+.lineup-court {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+.lineup-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  min-width: 0; /* que los nombres largos no ensanchen la cuadrícula */
+}
+.lineup-slot select {
+  width: 100%;
+}
+.lineup-slot.server span {
+  color: var(--text);
+  font-weight: 700;
+}
+.lineup-slot select {
+  padding: 0.35rem 0.3rem;
+}
+.rotation-heading {
+  margin: 0.75rem 0 0.4rem;
+  font-size: 0.95rem;
 }
 .team-actions .btn {
   font-size: 0.8rem;

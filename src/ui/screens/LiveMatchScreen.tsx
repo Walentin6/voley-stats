@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ParsedCode } from '../../domain/code-parser';
-import { computeMatchState, needsTiebreakServeChoice } from '../../domain/match-state';
+import { computeMatchState, needsTiebreakServeChoice, setHasPlay } from '../../domain/match-state';
 import { eventFromCode } from '../../domain/factories';
+import { lastLineup } from '../../domain/rotation';
 import type { TeamSide } from '../../domain/types';
 import { downloadJson, matchFilename } from '../../storage/export';
 import { Page } from '../components/Page';
@@ -9,6 +10,7 @@ import { useMatch } from '../hooks/useMatch';
 import { ActionPad } from '../live/ActionPad';
 import { CodeInput } from '../live/CodeInput';
 import { EventLog } from '../live/EventLog';
+import { LineupEditor } from '../live/LineupEditor';
 import { Scoreboard } from '../live/Scoreboard';
 import { StatsView } from '../live/StatsView';
 import type { Navigate } from '../navigation';
@@ -23,6 +25,10 @@ function isTypingTarget(target: EventTarget | null): boolean {
 export function LiveMatchScreen({ navigate, matchId }: { navigate: Navigate; matchId: string }) {
   const { match, state, addEvent, removeEvent, replaceEvent, undoLast, saveError, getLatest } = useMatch(matchId);
   const [tab, setTab] = useState<Tab>('entry');
+  /** Equipo cuya formación se está editando con el botón "Formación". */
+  const [editingLineup, setEditingLineup] = useState<TeamSide | null>(null);
+  /** Set en el que se eligió "Seguir sin formación". */
+  const [skippedLineupSet, setSkippedLineupSet] = useState<number | null>(null);
   const codeInputRef = useRef<HTMLInputElement>(null);
   const goHome = () => navigate({ name: 'home' });
 
@@ -66,6 +72,23 @@ export function LiveMatchScreen({ navigate, matchId }: { navigate: Navigate; mat
   const askTiebreakServe = needsTiebreakServeChoice(match, state);
   const entryDisabled = state.finished || askTiebreakServe;
   const chooseServe = (team: TeamSide) => record({ kind: 'serve', team });
+  const setNumber = state.currentSetIndex + 1;
+
+  // Formaciones: se proponen al empezar cada set (se puede omitir), y se pueden
+  // abrir en cualquier momento con el botón "Formación" de cada equipo.
+  const missingLineups = (['home', 'away'] as const).filter((side) => !state.courts[side]);
+  const proposeLineups =
+    tab === 'entry' &&
+    !state.finished &&
+    !setHasPlay(match, state) &&
+    skippedLineupSet !== state.currentSetIndex &&
+    missingLineups.length > 0;
+  const lineupsToShow: TeamSide[] = editingLineup ? [editingLineup] : proposeLineups ? missingLineups : [];
+
+  function saveLineup(team: TeamSide, positions: number[]) {
+    record({ kind: 'lineup', team, positions });
+    setEditingLineup(null);
+  }
 
   return (
     <Page
@@ -112,10 +135,48 @@ export function LiveMatchScreen({ navigate, matchId }: { navigate: Navigate; mat
         </button>
       </div>
 
+      {lineupsToShow.length > 0 && (
+        <section className="lineups" aria-label="Formaciones">
+          <div className="row-between">
+            <h3>{editingLineup ? 'Formación' : `Formación del set ${setNumber}`}</h3>
+            {!editingLineup && (
+              <button className="btn ghost" onClick={() => setSkippedLineupSet(state.currentSetIndex)}>
+                Seguir sin formación
+              </button>
+            )}
+          </div>
+          {!editingLineup && (
+            <p className="small muted">
+              Opcional. Con la formación, la app rota sola, sabe quién saca y calcula estadísticas por rotación.
+            </p>
+          )}
+          <div className="lineup-list">
+            {lineupsToShow.map((side) => (
+              <LineupEditor
+                key={`${side}-${state.currentSetIndex}`}
+                match={match}
+                team={side}
+                title={match[side].name}
+                initial={state.courts[side]?.positions ?? lastLineup(match, side)}
+                onSave={(positions) => saveLineup(side, positions)}
+                onCancel={editingLineup ? () => setEditingLineup(null) : undefined}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
       {tab === 'entry' ? (
         <>
           <CodeInput match={match} disabled={entryDisabled} onRecord={record} inputRef={codeInputRef} />
-          <ActionPad match={match} state={state} disabled={entryDisabled} onRecord={record} onUndo={undoLast} />
+          <ActionPad
+            match={match}
+            state={state}
+            disabled={entryDisabled}
+            onRecord={record}
+            onUndo={undoLast}
+            onEditLineup={(side) => setEditingLineup(side)}
+          />
           <EventLog match={match} state={state} onDelete={removeEvent} onReplace={replaceEvent} />
         </>
       ) : (

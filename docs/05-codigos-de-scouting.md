@@ -7,6 +7,7 @@ Las pruebas están en [`code-parser.test.ts`](../src/domain/code-parser.test.ts)
 
 ```
 [equipo] número fundamento calidad      acción de un jugador
+[equipo] S calidad                      saque del jugador en P1 (requiere formación)
 [equipo] p                              punto manual
 [equipo] T                              tiempo muerto
 [equipo] c sale:entra                   cambio de jugador
@@ -43,6 +44,17 @@ Ejemplo: saca el local y su jugador 5 falla el saque.
 Si en una misma línea un código termina el rally, los siguientes ya usan el saque nuevo:
 en `5S= 3S+`, el `3S+` es del visitante.
 
+## Saque sin número
+
+Con la formación cargada (ver "Rotaciones" en [04 — Reglas de juego](04-reglas-de-juego.md)),
+la app sabe quién está en la posición 1, que es quien saca. Entonces alcanza con escribir
+`S` y la calidad: `S+`, `S#`, `S=`.
+
+- Sin prefijo, es del equipo que tiene el saque. Con prefijo (`aS+`), del equipo indicado.
+- Si ese equipo no tiene formación cargada, se pide el número (ej. `5S+`).
+- En una línea con varios códigos, cada `S` usa la rotación del momento:
+  en `S+ a3R+ a4A# S-`, el segundo saque es del nuevo P1 del visitante, que acaba de rotar.
+
 ## Ejemplos
 
 | Código | Significado |
@@ -56,6 +68,8 @@ en `5S= 3S+`, el `3S+` es del visitante.
 | `5F+` | Local, jugador 5, free ball bueno |
 | `p` | Punto manual para el local |
 | `ap` | Punto manual para el visitante |
+| `S+` | Saque bueno del jugador en P1 del equipo que saca (con formación cargada) |
+| `S+ 3R- a14A/ 9B#` | Un rally completo sin escribir quién saca |
 | `T` / `aT` | Tiempo muerto del local / del visitante |
 | `c7:12` | Cambio en el local: sale el 7, entra el 12 |
 | `ac3:15` | Cambio en el visitante: sale el 3, entra el 15 |
@@ -81,7 +95,7 @@ aparece además un aviso ⚠ en naranja. Ver "Avisos de carga" en
 
 Data Volley usa un código mucho más rico, por ejemplo `*7AH#V5~47C`:
 
-| Parte | Data Volley | VoleyStats v0.2 |
+| Parte | Data Volley | VoleyStats v0.3 |
 |---|---|---|
 | Equipo, número, fundamento, calidad | ✅ | ✅ |
 | Tipo de golpe (H alta, M media, Q rápida, T tensa...) | ✅ | ❌ Próxima etapa |
@@ -89,7 +103,8 @@ Data Volley usa un código mucho más rico, por ejemplo `*7AH#V5~47C`:
 | Zonas de origen/destino (`47`) y subzonas (`C`) | ✅ | ❌ Etapa "cancha" |
 | Llamada del armador (K1, K2...) | ✅ | ❌ |
 | Tiempos muertos y cambios | ✅ | ✅ (`T`, `c7:12`) |
-| Códigos de rotación y formación | ✅ | ❌ Etapa "rotaciones" |
+| Formación y rotaciones | ✅ (con códigos) | ✅ (con botones; sin código) |
+| Saque sin número (sacador según rotación) | ✅ | ✅ (`S+`) |
 
 El parser está pensado para **crecer**: las partes nuevas se agregarán al final del
 código como opcionales, de modo que `7A#` siga siendo válido.

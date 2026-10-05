@@ -57,6 +57,23 @@ Detalles:
   no cuentan como rally nuevo.
 - Quién sacaba se toma de `servingTeam`, calculado al reproducir los eventos.
 
+## Por rotación
+
+Si se cargó la formación, debajo de la tabla de jugadores aparece una tabla **por rotación**
+(P1–P6 según la posición del armador, o R1–R6 si no hay armador marcado):
+
+| Columna | Cálculo |
+|---|---|
+| Side-out | rallies ganados recibiendo / rallies jugados recibiendo, en esa rotación |
+| Break-point | rallies ganados sacando / rallies jugados sacando, en esa rotación |
+| Saldo | puntos ganados − puntos perdidos en esa rotación |
+
+La rotación de cada rally es la que tenía el equipo **cuando se jugó** (antes de rotar por
+ese punto). Los rallies sin formación cargada no entran en esta tabla.
+
+Sirve para ver en qué rotación sufre el equipo: por ejemplo, un saldo de −6 en P4 indica
+que conviene revisar la recepción o el ataque en esa rotación.
+
 ## Ejemplo
 
 Un atacante con 10 ataques: 4 puntos (`#`), 1 error (`=`), 1 bloqueado (`/`), 4 seguidos.
@@ -65,6 +82,6 @@ Un atacante con 10 ataques: 4 puntos (`#`), 1 error (`=`), 1 bloqueado (`/`), 4 
 
 ## Próximas estadísticas
 
-- Rendimiento por rotación (requiere seguir las rotaciones).
+- Por rotación: también recepción y ataque de cada rotación.
 - Ataque después de recepción perfecta / mala, contraataque.
 - Mapas de dirección (requiere zonas).

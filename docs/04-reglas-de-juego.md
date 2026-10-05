@@ -97,6 +97,54 @@ fundamento, pero el punto lo tiene solo la primera.
 - Como todavía no se siguen las rotaciones, un cambio solo queda anotado (quién sale y quién
   entra); no se comprueba que el que sale estuviera en cancha.
 
+## Rotaciones
+
+Implementadas en [`src/domain/rotation.ts`](../src/domain/rotation.ts). Son **opcionales**: si
+no se carga la formación, la app funciona como antes (sin rotación ni sacador automático).
+
+### Formación
+Al empezar cada set, se cargan los 6 jugadores de cada equipo en su posición:
+
+```
+        RED
+   P4   P3   P2
+   P5   P6   P1   ← P1 saca
+```
+
+- La app la propone al empezar cada set, con la formación del set anterior ya puesta.
+  Se puede omitir ("Seguir sin formación").
+- Se puede cargar o corregir en cualquier momento con el botón **Formación**.
+- El **líbero no va en la formación** (ver más abajo).
+- Cada set empieza **sin formación**: hay que cargarla de nuevo (o confirmar la propuesta).
+
+### Rotación
+- Cuando un equipo **recupera el saque** (gana un rally recibiendo, es decir, un side-out),
+  **rota** en sentido horario: el de P2 pasa a P1, el de P3 a P2... y el de P1 a P6.
+- El jugador en **P1 saca**. Por eso, con formación cargada, el saque se puede registrar sin
+  número (`S+`, o el botón *Saque* sin elegir jugador).
+- Si el equipo gana sacando (break-point), no rota.
+- Un cambio manual de saque (*⇄ Cambiar saque*) no rota a nadie: es solo una corrección.
+
+### Nombre de cada rotación
+- Si en la plantilla hay un jugador marcado como **armador** y está en cancha, la rotación se
+  llama por la **posición del armador**: P1 (armador en posición 1) ... P6. Es como lo hace
+  Data Volley.
+- Si no hay armador, se llaman **R1 ... R6**: R1 es la formación inicial, R2 después de una
+  rotación, y así.
+
+### Cambios
+- El jugador que entra ocupa **la posición del que sale**.
+- Aviso si el que sale no estaba en cancha, o si el que entra ya estaba.
+
+### Líbero
+Para no complicar la carga en vivo, **las entradas y salidas del líbero no se registran**
+(tampoco cuentan como cambio en el reglamento). Las acciones del líbero se cargan con su
+número, como las de cualquiera. La rotación no cambia porque el líbero solo reemplaza a
+jugadores de la zona de atrás y nunca saca. Ver
+[ADR-006](adr/ADR-006-rotaciones-y-libero.md).
+
+Si se registra un cambio con el líbero, se avisa y no se cuenta.
+
 ## Avisos de carga
 
 La app revisa cada acción y marca con ⚠ las que probablemente sean un error. **Nunca impide
@@ -110,12 +158,18 @@ manda (ver [ADR-005](adr/ADR-005-avisos-no-bloqueantes.md)).
 | Recibe el mismo equipo que saca | Un `R` del equipo que saca |
 | Más de 2 tiempos muertos en el set | Tercer tiempo muerto (o más) de un equipo en el set |
 | Más de 6 cambios en el set | Séptimo cambio (o más) de un equipo en el set |
+| Saca un jugador que no está en la posición 1 | Con formación: un `S` de alguien que no está en P1 |
+| El jugador no está en cancha según la formación | Con formación: acción de un jugador del banco (no aplica al líbero) |
+| El jugador que sale no estaba en cancha | Con formación: cambio de alguien que no está jugando |
+| El jugador que entra ya estaba en cancha | Con formación: cambio por alguien que ya está jugando |
+| Las entradas del líbero no se registran como cambio | Un cambio en el que entra o sale el líbero |
 
 Los avisos aparecen en la vista previa del campo de códigos (antes de registrar) y en el
 historial (después).
 
 ## Limitaciones conocidas
 
-- **Rotaciones y líbero**: no se siguen todavía.
+- **Líbero**: sus entradas y salidas no se registran (ver "Rotaciones").
+- **Faltas de rotación**: no se detectan (por ejemplo, un jugador fuera de posición al sacar).
 - **Espejos al final del partido**: si el punto que cierra el partido es un ace, ya no se
   puede cargar el `R=` del rival (no hace falta: el punto ya está contado).

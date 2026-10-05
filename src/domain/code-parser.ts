@@ -3,6 +3,7 @@
  * Gramática completa en docs/05-codigos-de-scouting.md.
  *
  *   [equipo] número fundamento calidad     →  "7A#", "a12R+", "*4S="
+ *   [equipo] S calidad                     →  "S+"     (saque del jugador en P1; requiere formación)
  *   [equipo] p                             →  "ap"     (punto manual)
  *   [equipo] T                             →  "aT"     (tiempo muerto)
  *   [equipo] c sale:entra                  →  "c7:12"  (cambio)
@@ -14,7 +15,8 @@
  * (el saque/recepción automático solo funciona si se pasa el contexto).
  */
 import { eventFromCode } from './factories';
-import { computeMatchState, type RallyWarning } from './match-state';
+import { computeMatchState, type Courts, type RallyWarning } from './match-state';
+import { validateLineup } from './rotation';
 import { QUALITIES, SKILLS } from './skills';
 import type { Match, Quality, Skill, TeamSide } from './types';
 import { otherSide } from './types';
@@ -29,16 +31,22 @@ export type ParsedCode =
   | { kind: 'timeout'; team: TeamSide }
   | { kind: 'substitution'; team: TeamSide; playerOut: number; playerIn: number }
   /** Cambio manual de saque (solo desde botones, no tiene código). */
-  | { kind: 'serve'; team: TeamSide };
+  | { kind: 'serve'; team: TeamSide }
+  /** Formación en cancha (solo desde botones, no tiene código). */
+  | { kind: 'lineup'; team: TeamSide; positions: number[] };
 
 export type ParseResult = { ok: true; value: ParsedCode } | { ok: false; error: string };
 
-/** Información del partido que ayuda a completar códigos sin prefijo. */
+/** Información del partido que ayuda a completar códigos incompletos. */
 export interface ParseContext {
   servingTeam: TeamSide;
+  /** Jugador en la posición 1 de cada equipo (si hay formación cargada). */
+  servers?: Partial<Record<TeamSide, number>>;
 }
 
 const ACTION_RE = /^(\d{1,2})([a-z])(.)$/i;
+/** Saque sin número ("S+"): el sacador sale de la formación. */
+const SERVE_NO_NUMBER_RE = /^s(.)$/i;
 const SUBSTITUTION_RE = /^c(\d{1,2})[:.](\d{1,2})$/i;
 
 /** Equipo por defecto cuando el código no tiene prefijo. */
@@ -74,7 +82,22 @@ export function parseCode(input: string, context?: ParseContext): ParseResult {
     return { ok: true, value: { kind: 'substitution', team, playerOut, playerIn } };
   }
 
-  // 3) Acción de jugador
+  // 3) Saque sin número: lo hace el jugador en posición 1
+  const serve = SERVE_NO_NUMBER_RE.exec(text);
+  if (serve) {
+    const quality = serve[1] as Quality;
+    if (!QUALITIES.includes(quality)) {
+      return { ok: false, error: `Calidad "${quality}" desconocida. Usa ${QUALITIES.join(' ')}` };
+    }
+    const serveTeam = explicitTeam ?? context?.servingTeam ?? 'home';
+    const server = context?.servers?.[serveTeam];
+    if (server === undefined) {
+      return { ok: false, error: 'Sin formación cargada, el saque necesita el número del jugador (ej. 5S+)' };
+    }
+    return { ok: true, value: { kind: 'action', team: serveTeam, playerNumber: server, skill: 'S', quality } };
+  }
+
+  // 4) Acción de jugador
   const m = ACTION_RE.exec(text);
   if (!m) {
     return { ok: false, error: `"${input.trim()}" no tiene el formato número + fundamento + calidad (ej. 7A#)` };
@@ -102,7 +125,16 @@ export function validateParsedCode(match: Match, code: ParsedCode): string | nul
     team.players.some((p) => p.number === n) ? null : `${team.name} no tiene un jugador con el número ${n}`;
   if (code.kind === 'action') return missing(code.playerNumber);
   if (code.kind === 'substitution') return missing(code.playerOut) ?? missing(code.playerIn);
+  if (code.kind === 'lineup') return validateLineup(match, code.team, code.positions);
   return null;
+}
+
+/** Jugador en posición 1 de cada equipo con formación cargada. */
+export function serversOf(courts: Courts): Partial<Record<TeamSide, number>> {
+  const servers: Partial<Record<TeamSide, number>> = {};
+  if (courts.home) servers.home = courts.home.positions[0];
+  if (courts.away) servers.away = courts.away.positions[0];
+  return servers;
 }
 
 export type ParseLineResult =
@@ -127,7 +159,7 @@ export function parseLine(match: Match, line: string): ParseLineResult {
   let working = match;
   let state = computeMatchState(working);
   for (const part of parts) {
-    const r = parseCode(part, { servingTeam: state.serving });
+    const r = parseCode(part, { servingTeam: state.serving, servers: serversOf(state.courts) });
     if (!r.ok) return { ok: false, error: r.error };
     const problem = validateParsedCode(match, r.value);
     if (problem) return { ok: false, error: problem };
